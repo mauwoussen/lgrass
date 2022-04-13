@@ -8,15 +8,16 @@ from datetime import datetime, timedelta
 
 
 def import_meteo_data(meteo_path, sowing_date, site):
-    meteo_data = pd.read_csv(meteo_path, sep=',')
-    meteo_data = meteo_data[meteo_data.site == site]
-    meteo_data = thermal_time_calculation(meteo_data, sowing_date)
+    data = pd.read_csv(meteo_path, sep=',')
+    data = data.loc[data.site == site]
+    meteo_data = thermal_time_calculation(data.loc[data.site == site], sowing_date)
     meteo_data['experimental_day'] = list(range(1, len(meteo_data) + 1))
     if 'daylength' in meteo_data.columns:
         return meteo_data
     else:
         meteo_data = daylength_series(meteo_data)
         return meteo_data
+
 
 def thermal_time_calculation(meteo_data, sowing_date):
     """
@@ -36,7 +37,7 @@ def thermal_time_calculation(meteo_data, sowing_date):
                 prev_value = meteo_data.mean_temperature[meteo_data.index == id_missing_value - 1].item()
                 next_value = meteo_data.mean_temperature[meteo_data.index == id_missing_value + 1].item()
                 meteo_data.loc[id_missing_value, 'mean_temperature'] = np.mean([prev_value, next_value])
-    meteo_data = meteo_data.loc[meteo_data['date'] >= pd.to_datetime(sowing_date, format='%Y_%m_%d')]
+    meteo_data = meteo_data.loc[meteo_data['date'] >= pd.to_datetime(sowing_date, format='%Y_%m_%d')].reset_index(drop=True)
     meteo_data['thermal_time_cumul'] = meteo_data.mean_temperature.cumsum()
     return meteo_data
 
