@@ -112,6 +112,11 @@ def calculate_C(x):
     return 0.1 * x + 1.2
 
 
+def calculate_premierCroiss(x):
+    # Obtenir une plage de valeurs entre [80;120] à partir de [-4;4]
+    pass
+
+
 # Création du fichier de paramètres d'entrée pour chaque plante et configuration du planteur lgrass
 def define_param(in_param_file='inputs/liste_plantes.csv', in_genet_file=None,
                  out_param_file='outputs/Simulation1.csv', id_gener=1, opt_repro=None):
@@ -126,8 +131,9 @@ def define_param(in_param_file='inputs/liste_plantes.csv', in_genet_file=None,
         L = [param_name[par]]
         for i in range(len(data)):
             L.append(str(data[param_name[par]].iloc[i]))
-        for _ in range(len(data), len(genet_data)):
-            L.append(str(data[param_name[par]].iloc[len(data)-1]))
+        if opt_repro is not None and opt_repro != "False":
+            for _ in range(len(data), len(genet_data)):
+                L.append(str(data[param_name[par]].iloc[len(data)-1]))
         param_init.write(";".join(L) + "\n")
     param_init.close()
     # lecture du fichier, creation de ParamP et des parametres de floraison

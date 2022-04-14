@@ -21,7 +21,7 @@ import time
 
 
 # préparation de l'ensemble des conditions/paramètres et exécution de lgrass
-def runlsystem(plan_sim=None, id_scenario=0, id_gener=1):
+def runlsystem(plan_sim=None, id_scenario=0, id_gener=1, display=False):
     if plan_sim is None:
         raise NameError('Pas de plan de simulation chargé.')
 
@@ -92,20 +92,21 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1):
     for dd in range(0, lsystem.derivationLength):
         day = lsystem.current_day
         lstring = lsystem.derive(lstring, dd, 1)
-        # lscene = lsystem.sceneInterpretation(lstring)
-        if opt_caribu:
-            # on exécute caribu une fois par jour
-            if lsystem.current_day > day:
-                # fonction d'application de caribu
-                lsystem.BiomProd, dico_caribu['radiation_interception'], dico_caribu[
-                    'Ray'] = run_caribu_lgrass.runcaribu(lstring, lscene, lsystem.current_day,
-                                                         lsystem.tiller_appearance,
-                                                         lsystem.nb_plantes, dico_caribu)
-                # fichier de sortie de caribu
-                output.write(";".join(
-                    [str(lsystem.TPS), str(lsystem.sowing_date), str(lsystem.current_day), str(lsystem.nb_talle[0]),
-                     str(lsystem.BiomProd[0]), str(lsystem.rapportS9_SSol_dict[0])]) + "\n")
-        # opal.all.Viewer.display(lscene)
+        if display:
+            lscene = lsystem.sceneInterpretation(lstring)
+            if opt_caribu:
+                # on exécute caribu une fois par jour
+                if lsystem.current_day > day:
+                    # fonction d'application de caribu
+                    lsystem.BiomProd, dico_caribu['radiation_interception'], dico_caribu[
+                        'Ray'] = run_caribu_lgrass.runcaribu(lstring, lscene, lsystem.current_day,
+                                                             lsystem.tiller_appearance,
+                                                             lsystem.nb_plantes, dico_caribu)
+                    # fichier de sortie de caribu
+                    output.write(";".join(
+                        [str(lsystem.TPS), str(lsystem.sowing_date), str(lsystem.current_day), str(lsystem.nb_talle[0]),
+                         str(lsystem.BiomProd[0]), str(lsystem.rapportS9_SSol_dict[0])]) + "\n")
+            opal.all.Viewer.display(lscene)
 
     # Matrice de croisement des plantes
     if opt_repro != "False":
@@ -118,6 +119,20 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1):
     if row['option_sauvegarde']:
         gen_lstring.save_lstring(lstring, lsystem)
 
+    out = open(os.path.join(OUTPUTS_DIRPATH, name + '_feuilles.csv'), 'w')
+    out.write("GDD;days;id_geno;id_plante;id_talle;id_rang;age;Agecroiss;Taillefeuille;Ymax;Taillelimbe;"
+              "Taillefinalelimbe;Taillegaine;Taillefinalegaine;Difftps;Phase;rapportK;coupe;Cutstatus;"
+              "angleinsert;angletal;surface_limbe;surface_gaine;biomass;Besoinencroiss;TailleEmergence;R\n")
+    for mod in lstring:
+        if mod.name in ('Feuille',):
+            out.write(';'.join([str(lsystem.derivationLength), str(lsystem.current_day), str(mod[0].id_geno), str(mod[0].id_plante),
+                                str(mod[0].id_talle), str(mod[0].id_rang), str(mod[0].age), str(mod[0].Agecroiss),
+                                str(mod[0].Taillefeuille), str(mod[0].Ymax), str(mod[0].Taillelimbe), str(mod[0].Taillefinalelimbe),
+                                str(mod[0].Taillegaine), str(mod[0].Taillefinalegaine), str(mod[0].Difftps), str(mod[0].Phase),
+                                str(mod[0].rapportK), str(mod[0].coupe), str(mod[0].Cutstatus), str(mod[0].angleinsert),
+                                str(mod[0].angletal), str(mod[0].surface_limbe), str(mod[0].surface_gaine), str(mod[0].biomass),
+                                str(mod[0].Besoinencroiss), str(mod[0].TailleEmergence), str(mod[0].R)]) + '\n')
+
     # Vider le lsystem
     lsystem.clear()
     print(''.join((name, " - done")))
@@ -125,7 +140,7 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1):
 
 
 # Algorithme de reproduction des générations via le modèle génétique
-def simpraise(plan_sim=None, id_scenario=0):
+def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
     if plan_sim is None:
         raise NameError('Pas de plan de simulation chargé.')
     row = plan_sim.iloc[id_scenario]
@@ -145,7 +160,7 @@ def simpraise(plan_sim=None, id_scenario=0):
         # fichiers de sortie associés à la ième génération
         plan_sim["name"] = row["name"] + "_G" + str(i)
         # modèle morpho et matrice de croisement
-        mat = runlsystem(plan_sim=plan_sim, id_scenario=id_scenario, id_gener=i)
+        mat = runlsystem(plan_sim=plan_sim, id_scenario=id_scenario, id_gener=i, display=display_morpho)
         # modèle génétique et paramètre C
         prf.rungenet(src, dst, exe, mat, 1)
     return 0
@@ -155,6 +170,7 @@ if __name__ == '__main__':
     timing = time.time()
     plan = pd.read_csv("inputs/plan_simulation.csv", sep=',')
 
-    # runlsystem(plan, 3, 1)
-    simpraise(plan_sim=plan, id_scenario=3)
+    # runlsystem(plan_sim=plan, id_scenario=4, id_gener=1, display=False)
+    for i in range(1, 4):
+        simpraise(plan_sim=plan, id_scenario=i, display_morpho=False)
     print('Global execution time : ', time.time() - timing)
