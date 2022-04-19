@@ -108,8 +108,8 @@ def get_genet_file(in_genet_file=None):
 # La formule pour convertir la donnée génétique en paramètre C
 def calculate_C(x):
     # La version de cette fonction est incomplète (Thibault Raquet), voir Leopoldo Sanchez Rodriguez pour compléter la formule
-    # se base sur une observation des sorties génétiques dont le paramètre variait entre -4 et 4, à convertir en [0.8, 1.6]
-    return 0.1 * x + 1.2
+    # se base sur une observation des sorties génétiques dont le paramètre variait entre -4 et 4, à convertir en [0.7, 1.6]
+    return 0.1125 * x + 1.15
 
 
 def calculate_premierCroiss(x):

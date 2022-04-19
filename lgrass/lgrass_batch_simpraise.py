@@ -144,7 +144,6 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
     if plan_sim is None:
         raise NameError('Pas de plan de simulation chargé.')
     row = plan_sim.iloc[id_scenario]
-
     # Config des fichiers d'entrée
     INPUTS_DIRPATH = 'inputs'
     src = os.path.join(INPUTS_DIRPATH, 'insim.txt')
@@ -158,7 +157,7 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
     for i in range(1, row['num_gener'] + 1):
         time.sleep(2)  # Laisser le temps au modèle génétique de mettre à jour ses fichiers
         # fichiers de sortie associés à la ième génération
-        plan_sim["name"] = row["name"] + "_G" + str(i)
+        plan_sim.loc[id_scenario, "name"] = row['name'] + "_G" + str(i)
         # modèle morpho et matrice de croisement
         mat = runlsystem(plan_sim=plan_sim, id_scenario=id_scenario, id_gener=i, display=display_morpho)
         # modèle génétique et paramètre C
@@ -170,7 +169,7 @@ if __name__ == '__main__':
     timing = time.time()
     plan = pd.read_csv("inputs/plan_simulation.csv", sep=',')
 
-    # runlsystem(plan_sim=plan, id_scenario=4, id_gener=1, display=False)
-    for i in range(1, 4):
-        simpraise(plan_sim=plan, id_scenario=i, display_morpho=False)
+    # runlsystem(plan_sim=plan, id_scenario=1, id_gener=1, display=False)
+    for i in range(1, 3):
+        simpraise(plan_sim=plan, id_scenario=i, display_morpho=True)
     print('Global execution time : ', time.time() - timing)

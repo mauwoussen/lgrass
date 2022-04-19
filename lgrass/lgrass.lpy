@@ -67,6 +67,7 @@ gaino=profilegaine.deepcopy()
 groupe='croissance' # Permet de realiser les coupes
 reprise_coupe=False
 #CoupeTaille=600000.
+changing_day_cutting = None
 
 # Default name of the output
 output_induction_file_name = 'output_induction'
@@ -140,8 +141,6 @@ if option_morphogenetic_regulation_by_carbone == True:
 # -------------------------------------------- Coupe ---------------------------------------------
 # ------------------------------------------------------------------------------------------------
 cutting_dates = []
-changing_day_cutting = True # Allow that cutting occurs only once in a day (the first GDD)
-
 
 #########   Definition Plante   #########
 scales={}
@@ -732,10 +731,10 @@ def Start():
   global current_day, meteo, tiller_appearance, tiller_to_remove
   #Ajout variables globales pour sauvegarde de lstring 03/06/2020
   global les_feuilles
+  global changing_day_cutting
 
   # Camera setting
   #Viewer.camera.lookAt((250,250,50),(-100,-100,50))#((Position),(direction))
-
 
   ##### Parametres de temps #####
   timing=t.time()
@@ -755,6 +754,7 @@ def Start():
   current_day = meteo.experimental_day.tolist()[0]
 
   # Ajout Thibault 03/06/2020
+  changing_day_cutting = [True] * nb_plantes # Allow that cutting occurs only once in a day (the first GDD)
   # Recuperation des variables issues de la simulation sauvegardee
   if OptionAxiom:
     import gen_lstring
@@ -827,15 +827,13 @@ def StartEach(lstring):
   RootPotentialNewBiomass=[0]*(nb_plantes)
   longueur_totale_feuille=0
   Rootbiom=0
-
   for ID in range(nb_plantes):
     # AJOUT SIMON 24-12-2019
-
-    if current_day in cutting_dates and changing_day_cutting == True:
+    if current_day in cutting_dates and changing_day_cutting[ID] == True:
       ParamP[ID]['DCOUP'] = TPS
-      changing_day_cutting = False
+      changing_day_cutting[ID] = False
     if current_day not in cutting_dates:
-      changing_day_cutting = True
+      changing_day_cutting[ID] = True
 
     ### Declenchement de la coupe selon la date ###
     if TPS==ParamP[ID]['DCOUP']:
