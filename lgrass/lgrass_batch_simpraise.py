@@ -11,6 +11,7 @@ import openalea.lpy as opy
 import openalea.plantgl as opal
 import meteo_ephem
 import param_reproduction_functions as prf
+from output_data import CsvGenerator
 import cuts
 import run_caribu_lgrass
 import gen_lstring
@@ -21,7 +22,7 @@ import time
 
 
 # préparation de l'ensemble des conditions/paramètres et exécution de lgrass
-def runlsystem(plan_sim=None, id_scenario=0, id_gener=1, display=False):
+def runlsystem(plan_sim=None, id_scenario=0, genet_path='modelgenet', id_gener=1, display=False):
     if plan_sim is None:
         raise NameError('Pas de plan de simulation chargé.')
 
@@ -33,7 +34,6 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1, display=False):
     # Répertoires de lecture/écriture
     INPUTS_DIRPATH = 'inputs'
     OUTPUTS_DIRPATH = 'outputs'
-    GENET_DIRPATH = 'modelgenet'
 
     # Charger le plan de simulation et le lsystem
     row = plan_sim.iloc[id_scenario]
@@ -44,7 +44,7 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1, display=False):
 
     # Choix du fichier de lecture du C en fonction de l'option de reproduction des plantes
     opt_repro = row["option_reproduction"]
-    in_genet_file = os.path.join(GENET_DIRPATH, genet_file) if not opt_repro or opt_repro != 'False' else None
+    in_genet_file = os.path.join(genet_path, genet_file) if opt_repro in ('spikelets', 'SPPR_2012') else None
     in_param_file = os.path.join(INPUTS_DIRPATH, param_plant_file)
 
     # Parametres des plantes
@@ -119,19 +119,11 @@ def runlsystem(plan_sim=None, id_scenario=0, id_gener=1, display=False):
     if row['option_sauvegarde']:
         gen_lstring.save_lstring(lstring, lsystem)
 
-    out = open(os.path.join(OUTPUTS_DIRPATH, name + '_feuilles.csv'), 'w')
-    out.write("GDD;days;id_geno;id_plante;id_talle;id_rang;age;Agecroiss;Taillefeuille;Ymax;Taillelimbe;"
-              "Taillefinalelimbe;Taillegaine;Taillefinalegaine;Difftps;Phase;rapportK;coupe;Cutstatus;"
-              "angleinsert;angletal;surface_limbe;surface_gaine;biomass;Besoinencroiss;TailleEmergence;R\n")
-    for mod in lstring:
-        if mod.name in ('Feuille',):
-            out.write(';'.join([str(lsystem.derivationLength), str(lsystem.current_day), str(mod[0].id_geno), str(mod[0].id_plante),
-                                str(mod[0].id_talle), str(mod[0].id_rang), str(mod[0].age), str(mod[0].Agecroiss),
-                                str(mod[0].Taillefeuille), str(mod[0].Ymax), str(mod[0].Taillelimbe), str(mod[0].Taillefinalelimbe),
-                                str(mod[0].Taillegaine), str(mod[0].Taillefinalegaine), str(mod[0].Difftps), str(mod[0].Phase),
-                                str(mod[0].rapportK), str(mod[0].coupe), str(mod[0].Cutstatus), str(mod[0].angleinsert),
-                                str(mod[0].angletal), str(mod[0].surface_limbe), str(mod[0].surface_gaine), str(mod[0].biomass),
-                                str(mod[0].Besoinencroiss), str(mod[0].TailleEmergence), str(mod[0].R)]) + '\n')
+    csv_generator = CsvGenerator(lstring, name, OUTPUTS_DIRPATH)
+    csv_generator.metadata_to_csv(lsystem)
+    csv_generator.leaves_to_csv()
+    csv_generator.internodes_to_csv()
+    csv_generator.apex_to_csv()
 
     # Vider le lsystem
     lsystem.clear()
@@ -147,8 +139,13 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
     # Config des fichiers d'entrée
     INPUTS_DIRPATH = 'inputs'
     src = os.path.join(INPUTS_DIRPATH, 'insim.txt')
-    dst = 'modelgenet'
+    dst = f"modelgenet_{row['name']}"
     exe = 'simpraise.exe'
+
+    # TODO : Valable sous windows
+    os.system(f"mkdir .\\{dst}")
+    for f in os.listdir('.\\modelgenet'):
+        os.system(f'copy .\\modelgenet\\{f} .\\{dst}\\{f}')
 
     # Génération des fondateurs, première exécution du modèle génétique
     prf.rungenet(src, dst, exe, None, 0)
@@ -159,9 +156,10 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
         # fichiers de sortie associés à la ième génération
         plan_sim.loc[id_scenario, "name"] = row['name'] + "_G" + str(i)
         # modèle morpho et matrice de croisement
-        mat = runlsystem(plan_sim=plan_sim, id_scenario=id_scenario, id_gener=i, display=display_morpho)
+        mat = runlsystem(plan_sim=plan_sim, id_scenario=id_scenario, genet_path=dst, id_gener=i, display=display_morpho)
         # modèle génétique et paramètre C
         prf.rungenet(src, dst, exe, mat, 1)
+
     return 0
 
 
@@ -169,7 +167,7 @@ if __name__ == '__main__':
     timing = time.time()
     plan = pd.read_csv("inputs/plan_simulation.csv", sep=',')
 
-    # runlsystem(plan_sim=plan, id_scenario=1, id_gener=1, display=False)
-    for i in range(1, 3):
-        simpraise(plan_sim=plan, id_scenario=i, display_morpho=True)
+    # runlsystem(plan_sim=plan, id_scenario=4, id_gener=1, display=False)
+    for i in range(2, 4):
+        simpraise(plan_sim=plan, id_scenario=i, display_morpho=False)
     print('Global execution time : ', time.time() - timing)

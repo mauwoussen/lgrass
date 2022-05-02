@@ -9,7 +9,7 @@ insim.002
 *status_gener 
 0
 *mnum&fnum 
-32,32
+1,1
 *num_cand 
 64
 *n_traits 

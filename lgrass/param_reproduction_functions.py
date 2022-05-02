@@ -165,6 +165,19 @@ def define_param(in_param_file='inputs/liste_plantes.csv', in_genet_file=None,
 # Remplir le fichier d'entree du modèle génétique avec la matrice de croisement et executer le modèle
 def rungenet(src, dst, exe, mat, status):
     nb_plantes = 0
+    nb_founder = 0
+
+    # Bidouillage du fichier ped.r pour que le modèle génétique puisse supporter le changement du nombre de fondateurs
+    # entre 2 générations
+    if status == 1:
+        ped = open(os.path.join(dst, 'ped.r'), 'r').readlines()
+        new_ped = open(os.path.join(dst, 'ped.r'), 'w')
+        for line in ped:
+            row = list(line)
+            row[47] = '1'
+            new_ped.write(''.join(row))
+        new_ped.close()
+
     with open(src, "r") as file:
         source = file.readlines()
         with open(os.path.join(dst, 'insim.txt'), "w") as destination:
@@ -180,12 +193,19 @@ def rungenet(src, dst, exe, mat, status):
                     if source[line] == "*status_gener \n":
                         destination.write(f"{status}\n")
                         b = True
+                    elif source[line] == "*mnum&fnum \n":
+                        if status == 1:
+                            destination.write(f"{mat.shape[0] // 2},{mat.shape[1] // 2}\n")
+                            b = True
+                        else:
+                            nb_founder = source[line+1].split(',')
+                            nb_founder = int(nb_founder[0]) + int(nb_founder[1])
                     if source[line] == "*mating_design \n":
                         break
             if mat is None:  # Création aléatoire de la matrice de descendance
-                mat = np.zeros((nb_plantes, nb_plantes))
-                for rand in range(nb_plantes):
-                    plantes = list(range(nb_plantes))
+                mat = np.zeros((nb_founder, nb_founder))
+                for _ in range(nb_plantes):
+                    plantes = list(range(nb_founder))
                     mother = random.Random().choice(plantes)
                     plantes.remove(mother)
                     father = random.Random().choice(plantes)
