@@ -31,8 +31,10 @@ import pandas as pd
 from openalea.lpy import Lsystem
 import lgrass
 
-INPUTS_DIRPATH = 'inputs'
-OUTPUTS_DIRPATH = 'outputs'
+import csv
+
+INPUTS_DIRPATH = 'test/inputs'
+OUTPUTS_DIRPATH = 'test/outputs'
 
 NSTEP = 500
 PRECISION = 3

@@ -17,8 +17,8 @@ import pandas as pd
 
 
 ##### Configuration du chemin #####
-INPUTS_DIRPATH = 'inputs'
-OUTPUTS_DIRPATH = 'outputs'
+INPUTS_DIRPATH = 'test/inputs'
+OUTPUTS_DIRPATH = 'test/outputs'
 GRAPHS_DIRPATH = 'graphs'
 
 ##### Parametres plante #####
@@ -29,12 +29,12 @@ onglet2='FC'
 #paramP2=IOxls.read_plant_param(path_param, onglet2)
 #paramManagement=IOxls.read_plant_param(path_param, 'Management')
 
-TableParamP1=pd.read_excel(path_param, sheetname=onglet1)
-TableParamP2=pd.read_excel(path_param, sheetname=onglet2)
+TableParamP1=pd.read_excel(path_param, sheet_name=onglet1)
+TableParamP2=pd.read_excel(path_param, sheet_name=onglet2)
 paramP1=dict(zip(TableParamP1['name'],TableParamP1['value']))
 paramP2=dict(zip(TableParamP2['name'],TableParamP2['value']))
 
-TableManagement=pd.read_excel(path_param,sheetname='Management')
+TableManagement=pd.read_excel(path_param,sheet_name='Management')
 paramManagement=dict(zip(TableManagement['name'],TableManagement['value']))
 #ParamP=[paramP1,paramP2] #liste des parametres plante
 #nb_plantes=len(ParamP)
@@ -373,8 +373,8 @@ parameters['segment']=['seg']
 
 #########   definition sol   #########
 path_sol=os.path.join(INPUTS_DIRPATH, 'sol2.txt')
-fichier_sol=open(path_sol, "rb")
-tableau_sol=csv.reader(fichier_sol, delimiter='	')
+fichier_sol=open(path_sol, "r")
+tableau_sol=csv.reader(fichier_sol, delimiter='\t')
 Sol=[]
 j=0
 for x in tableau_sol:
@@ -561,7 +561,7 @@ def my_axialtree2mtg(tree, scale, scene, parameters, TREE=[]):
 def LongueurFeuilleCoupee(segments_feuille,ID): #Renvoie idLong si hauteur>HCOUP, renvoie -1 si hauteur<HCOUP
   for x in segments_feuille:
     if x[0].hauteur > ParamP[ID]['HCOUP']:
-      return x[0].idLong  # Retourne l'id du 1er segment coupé
+      return x[0].idLong  # Retourne l'id du 1er segment coupï¿½
   return -1 
 
 ########   Fonction racinaires   ########
@@ -801,7 +801,7 @@ def Start():
   ligule_height_dict = {}
   
   ##### Definition des groupes de production #####
-  surface_foliaire_emergee =[0.]*(nb_plantes) # Surface foliaire émergée totale obtenue a la fin d'un pas
+  surface_foliaire_emergee =[0.]*(nb_plantes) # Surface foliaire ï¿½mergï¿½e totale obtenue a la fin d'un pas
   Surfoliaireencours=[0.]*(nb_plantes) # variable de calcul de la surface foliaire totale
   Premiecroiss=[ParamP[i]['Premiecroiss'] for i in xrange(nb_plantes)]
   
@@ -866,13 +866,13 @@ def StartEach(lstring):
       if groupe=='croissance':
         groupe='defoliation'
         dt=0.25
-        print 'coupe'
+        print('coupe')
     
     if (TPS==ParamP[ID]['DCOUP']+1.):
       if groupe=='defoliation':
         if ParamP[ID]['DCOUP']+ParamP[ID]['FREQUCOUPE'] < ParamP[ID]['PREMIERCOUPE']+ParamP[ID]['DUREECOUPE']:
           ParamP[ID]['DCOUP']=ParamP[ID]['DCOUP']+ParamP[ID]['FREQUCOUPE']
-          print 'prochaine_coupe',ParamP[ID]['DCOUP']
+          print('prochaine_coupe',ParamP[ID]['DCOUP'])
         reprise_coupe=True
         groupe='croissance'
         dt=1
@@ -884,7 +884,7 @@ def StartEach(lstring):
           
   
   
-  #### Régression des talles : Détermination des zones où appliquer le Cut
+  #### Rï¿½gression des talles : Dï¿½termination des zones oï¿½ appliquer le Cut
   if option_tiller_regression == True and current_day > 1:
     mortality_zone = pd.DataFrame()
     for i in [i for i in range(len(lstring))]:
@@ -902,7 +902,7 @@ def StartEach(lstring):
     #      groupe='defoliation'
     #      dt=0.25
     #      CoupeTaille=TPS
-    #      print CoupeTaille
+    #      print(CoupeTaille)
     # 
     #if (TPS==CoupeTaille+1) and groupe=='defoliation':
     #  reprise_coupe=True
@@ -923,7 +923,7 @@ def EndEach(lstring, lscene):
 #  global apex_characteristics, internode_characteristics # AJOUT SIMON
   
   TPS=TPS+dt
-  print 'TPS :',TPS , 'Current day :', current_day # AJOUT SIMON
+  print('TPS :',TPS , 'Current day :', current_day) # AJOUT SIMON
   
   if reprise_coupe==True:
     reprise_coupe=False
@@ -1008,7 +1008,7 @@ def EndEach(lstring, lscene):
       # Biomasse et surface des feuilles emergees uniquement
       Biomasse_aerienne[id_plante] += sum([x.biomass for x in les_feuilles_talle])
       surface_foliaire_emergee[id_plante] += sum([x.surface_limbe for x in les_feuilles_talle])  #: N'ajoute que les surfaces de limbes emerges
-      # ajoute les surfaces des gaines emergees à partir de Seuil
+      # ajoute les surfaces des gaines emergees ï¿½ partir de Seuil
       seuil_talle = Seuil[id_plante][id_talle]
       diametre_seuil_talle = max((2 / pi) * (paramManagement['CoefDirLonLarAjust'] * log(max(seuil_talle * 5,1)) - paramManagement['OrdOriLonLarAjust']), 0.1)
       surface_gaine_emergee = (seuil_talle * pi * diametre_seuil_talle) / 2  # Surface projetee
@@ -1027,7 +1027,7 @@ def EndEach(lstring, lscene):
         # Approche RUE
         BiomassCree = BiomProd[id_plante]
       else:
-        # Approche croissance biomasse exponentielle (cf thèse Vincent Migault)
+        # Approche croissance biomasse exponentielle (cf thï¿½se Vincent Migault)
         BiomassCree=t2[id_plante]*(Biomasse_aerienne[id_plante]+t1[id_plante])*(1+Beta[id_plante]*Alpha[id_plante]*(Biomasse_aerienne[id_plante])**(Alpha[id_plante]-1))
       
       # Allocation aerien/racinaire + ratio offre/demande
@@ -1153,7 +1153,7 @@ def End(lstring,lscene): #Ecriture et fermeture des fichiers de sortie
     
   
   
-  print 'Execution time :',t.time()-timing
+  print('Execution time :',t.time()-timing)
 
 
 
@@ -1276,7 +1276,7 @@ phytomere(X, X_AP):
   if option_tiller_regression == True:
     if len(tiller_to_remove) > 0:
       if len(tiller_to_remove[(tiller_to_remove.id_plante == X.id_plante) & (tiller_to_remove.id_talle == X.id_talle)]) > 0 and len(mortality_zone[(mortality_zone.id_plante == X.id_plante) & (mortality_zone.id_talle == X.id_talle) & (mortality_zone.id_rang == X.id_rang)]) > 0:
-        print 'Tiller ', X.id_talle, ' of plant ', X.id_plante, ' is dead'
+        print('Tiller ', X.id_talle, ' of plant ', X.id_plante, ' is dead')
         produce Cut()
   else:
     if groupe == 'croissance':
@@ -1584,7 +1584,7 @@ Feuille(X, X_apex, X_phytomere):
     elif TPS==ParamP[X.id_plante]['DCOUP']+0.5:
         segments_feuille=[x for x in les_segments_feuilles if (x[0].id_plante==X.id_plante and x[0].id_talle==X.id_talle and x[0].id_rang==X.id_rang)]
         longcoupee=LongueurFeuilleCoupee(segments_feuille,X.id_plante)
-        if longcoupee<>-1:
+        if longcoupee!=-1:
           X.coupe=X.Taillefeuille-longcoupee
           X.Taillefeuille=longcoupee
           if X.Taillefeuille<X.Taillegaine:
@@ -1609,7 +1609,7 @@ Feuille(X, X_apex, X_phytomere):
       Taille_finale_gaine[X.id_plante][X.id_talle][X.id_rang]=X.Taillegaine
       
       if X.id_rang==1 and X.id_talle>0 and X.topology!=(0,0):  # Premiere feuille de chaque talle sauf brin maitre et talle coleoptile
-        feuille_ref = les_feuilles[(les_feuilles['Plante'] == X.id_plante) & (les_feuilles['Topology'] == X.topology[:-1]) & (les_feuilles['id_rang'] == max(1, X.topology[-1]))].iloc[0]['ObjetOrgane']    # Feuille axillante de l'ordre précédent (le max sert a traiter les cas des 1ers rangs)
+        feuille_ref = les_feuilles[(les_feuilles['Plante'] == X.id_plante) & (les_feuilles['Topology'] == X.topology[:-1]) & (les_feuilles['id_rang'] == max(1, X.topology[-1]))].iloc[0]['ObjetOrgane']    # Feuille axillante de l'ordre prï¿½cï¿½dent (le max sert a traiter les cas des 1ers rangs)
         Seuil[X.id_plante][X.id_talle]=max(Seuil[X.id_plante][X.id_talle], feuille_ref.Taillegaine)
       X.biomass=BiomassFeuille(X.Taillefeuille,X.coupe,X.id_geno)
     else:
@@ -1631,7 +1631,7 @@ SegFeuille(X):
 
 
 Entrenoeud(X_EN, X_AP, X_F, X_phytomere):
-  if (X_EN.internode_type <> 'long_internode' and X_AP.phenological_state == 'reproductive' and X_F.Phase <> 'mature'):
+  if (X_EN.internode_type != 'long_internode' and X_AP.phenological_state == 'reproductive' and X_F.Phase != 'mature'):
     X_EN.internode_type = 'long_internode'
   if (X_F.Phase == 'mature' and X_EN.internode_type == 'long_internode' and X_EN.length < X_F.Taillefinalegaine + 5):              # condition pour arreter la croissance des entrenoeuds
     X_EN.length += 10    # Remplissage des hauteurs d organes
@@ -1678,13 +1678,13 @@ apex(X):
           X.phenological_state = 'vernalized'          
       
       elif (X.phenological_state == 'vernalized' and X.total_created_leaves > 1):
-        print 'vernalized'
-        print flowering_model.photoperiod_induction_function(daily_daylength)
+        print('vernalized')
+        print(flowering_model.photoperiod_induction_function(daily_daylength))
         X.secondary_induction_index += flowering_model.photoperiod_induction_function(daily_daylength)
-        print X.secondary_induction_index
+        print(X.secondary_induction_index)
         if X.secondary_induction_index >= 1:
           X.phenological_state = 'reproductive'
-          print 'reproductive'
+          print('reproductive')
           
     df_induction = df_induction.append({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Daily_mean_temperature': daily_temperature, 'Daily_daylength': daily_daylength, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Leaf_produced': X.total_created_leaves, 'Primordia_on_apex': X.primordia_number, 'Spikelet_number': X.spikelet_created, 'Vernalisation_rate': X.primary_induction_index, 'Secondary_induction_rate': X.secondary_induction_index, 'Heading_date': X.heading_date}, ignore_index = True)
   
@@ -1731,11 +1731,11 @@ apex(X):
         
       elif X.retard==1:
         X.retard=2
-        print 'RETARD_1'
+        print('RETARD_1')
         produce apex(X)
       elif feuille_ref and abs(Seuil[X.id_plante][X.id_talle]-feuille_ref.Taillefeuille)<2: #Si |Seuil-Taillefeuille| <2mm
         X.retard=1
-        print 'RETARD_0'
+        print('RETARD_0')
         produce apex(X)
         
     if (X.phenological_state == 'reproductive' and X.total_created_leaves == X.final_leaf_number):
@@ -1769,12 +1769,12 @@ apex(X):
             height += X.organ_lengths_dict[i]['internode']
           if height >= highest_ligule['height']:
             highest_ligule = {'id_rang': phytomere_rank, 'height': height}
-        print 'La plus haute ligule est a : ' + str(highest_ligule['height'])
+        print('La plus haute ligule est a : ' + str(highest_ligule['height']))
             
         X.terminal_spikelet_height = X.organ_lengths_dict[max(X.organ_lengths_dict.keys())]['spikelet']
         for phytomere_rank in X.organ_lengths_dict.keys():
           X.terminal_spikelet_height += X.organ_lengths_dict[phytomere_rank]['internode']
-        print 'Le dernier epillet est a : ' + str(X.terminal_spikelet_height)
+        print('Le dernier epillet est a : ' + str(X.terminal_spikelet_height))
           
         if (X.heading_date is None and X.terminal_spikelet_height > highest_ligule['height']):
           X.heading_date = current_day
