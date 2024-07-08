@@ -17,9 +17,10 @@ import pandas as pd
 
 
 ##### Configuration du chemin #####
-INPUTS_DIRPATH = 'test/inputs'
-OUTPUTS_DIRPATH = 'test/outputs'
-GRAPHS_DIRPATH = 'graphs'
+CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+INPUTS_DIRPATH = os.path.join(CURRENT_FOLDER, 'inputs')
+OUTPUTS_DIRPATH = os.path.join(CURRENT_FOLDER, 'outputs')
+GRAPHS_DIRPATH = os.path.join(CURRENT_FOLDER, 'graphs')
 
 ##### Parametres plante #####
 path_param=os.path.join(INPUTS_DIRPATH,'Parametre_plante_Lgrass.xls') # Fichier contenant les parametres
@@ -110,6 +111,7 @@ flowering_model = flowering_functions.FloweringFunctions()
 from lgrass import meteo_ephem
 sowing_date = "2018_11_13"
 site = 'treatment_1'
+# meteo_path = os.path.join(INPUTS_DIRPATH,'meteo_controlled_conditions.csv')
 meteo_path = os.path.join(INPUTS_DIRPATH,'meteo_controlled_conditions.csv')
 
 
@@ -786,6 +788,7 @@ def Start():
   
   ##### Creation de parametres vides #####
   Biomasse_aerienne=[0.]*(nb_plantes) # Biomasse foliaire totale
+  print("pouet")
   Biomasse_racinaire=[0.]*(nb_plantes) # Biomasse racinaire
   BiomProd=[0.]*(nb_plantes)
   Ray=[0.]*(nb_plantes)
@@ -836,6 +839,7 @@ def Start():
   chemin_fichier2=open(os.path.join(OUTPUTS_DIRPATH,outvarfile2),"wb")
   taille_finale_feuille=csv.writer(chemin_fichier2)
   taille_finale_feuille.writerow(["TPS","Espacement","Densite","id plante","talle","rang","Phase","taille feuille","taille gaine","taille limbe"])
+  
 
 
 def StartEach(lstring):
@@ -846,7 +850,7 @@ def StartEach(lstring):
   
   
   
-  
+
   
   RootPotentialNewBiomass=[0]*(nb_plantes)
   longueur_totale_feuille=0
