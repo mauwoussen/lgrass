@@ -111,7 +111,6 @@ flowering_model = flowering_functions.FloweringFunctions()
 from lgrass import meteo_ephem
 sowing_date = "2018_11_13"
 site = 'treatment_1'
-# meteo_path = os.path.join(INPUTS_DIRPATH,'meteo_controlled_conditions.csv')
 meteo_path = os.path.join(INPUTS_DIRPATH,'meteo_controlled_conditions.csv')
 
 
@@ -615,7 +614,7 @@ def Gravitropisme(ID,vertex,segment,profondeur,elong,init):#age,ordre,Turtle):
     newtortue=tortue+G+Meca
     newtortue=newtortue/np.linalg.norm(newtortue)
     A=np.array([0.,0.,0.])
-    for i in xrange(3):
+    for i in range(3):
       a=np.array([Tortue[0,:],Tortue[1,:],Tortue[2,:]])
       a[:,i]=newtortue
       A[i]=np.linalg.det(a)/float(np.linalg.det(Tortue))
@@ -714,7 +713,7 @@ def LAI_proximite(id_plante):
   
   def posTOnum(pos): #Determination de l'id de la plante a partir de la position
     id_plante = -1
-    for i in xrange((NBlignes)*(NBcolonnes)):
+    for i in range((NBlignes)*(NBcolonnes)):
       if (posPlante[i] == pos):
         id_plante = i
     return id_plante
@@ -788,7 +787,6 @@ def Start():
   
   ##### Creation de parametres vides #####
   Biomasse_aerienne=[0.]*(nb_plantes) # Biomasse foliaire totale
-  print("pouet")
   Biomasse_racinaire=[0.]*(nb_plantes) # Biomasse racinaire
   BiomProd=[0.]*(nb_plantes)
   Ray=[0.]*(nb_plantes)
@@ -806,14 +804,14 @@ def Start():
   ##### Definition des groupes de production #####
   surface_foliaire_emergee =[0.]*(nb_plantes) # Surface foliaire �merg�e totale obtenue a la fin d'un pas
   Surfoliaireencours=[0.]*(nb_plantes) # variable de calcul de la surface foliaire totale
-  Premiecroiss=[ParamP[i]['Premiecroiss'] for i in xrange(nb_plantes)]
+  Premiecroiss=[ParamP[i]['Premiecroiss'] for i in range(nb_plantes)]
   
   ##### Relation allometrique #####
-  Alpha=[ParamP[i]['Alpha'] for i in xrange(nb_plantes)]
-  Beta=[ParamP[i]['Beta'] for i in xrange(nb_plantes)]
-  t1=[ParamP[i]['t1'] for i in xrange(nb_plantes)]
-  t2=[ParamP[i]['t2'] for i in xrange(nb_plantes)]
-  #t3=[ParamP[i]['t3'] for i in xrange(nb_plantes)]
+  Alpha=[ParamP[i]['Alpha'] for i in range(nb_plantes)]
+  Beta=[ParamP[i]['Beta'] for i in range(nb_plantes)]
+  t1=[ParamP[i]['t1'] for i in range(nb_plantes)]
+  t2=[ParamP[i]['t2'] for i in range(nb_plantes)]
+  #t3=[ParamP[i]['t3'] for i in range(nb_plantes)]
   option_caribu="Off"
   
   df_induction = pd.DataFrame(columns = ['GDD', 'Date', 'Site', 'Day', 'Daily_mean_temperature', 'Daily_daylength', 'Id_plante', 'Id_talle', 'Leaf_produced', 'Primordia_on_apex', 'Spikelet_number', 'Vernalisation_rate', 'Secondary_induction_rate', 'Heading_date'])
@@ -832,11 +830,11 @@ def Start():
 ##output_apex = 'output_apex_%s_%s_%s.csv'%(int(Espacement),DureeExp,ParamP[0]['HCOUP'])                  # Ajout SIMON
 #output_organ_characteristics = 'output_organ_characteristics%s_%s_%s.csv'%(int(Espacement),DureeExp,ParamP[0]['HCOUP'])    
 #outimage='Scene\scene_'+str(int(Espacement))+'_'+t.strftime('%d-%m-%y_%Hh%M',t.localtime())+'.bmp'
-  chemin_fichier1=open(os.path.join(OUTPUTS_DIRPATH,outvarfile),"wb")
+  chemin_fichier1=open(os.path.join(OUTPUTS_DIRPATH,outvarfile),"w")
   surface_biomass=csv.writer(chemin_fichier1)
   surface_biomass.writerow(["TPS","Espacement","Densite","id plante","id talle","topologie","nb_feuille_emergees","Biomasse_feuilles_emergees","Surface_feuilles_emergees"])
   
-  chemin_fichier2=open(os.path.join(OUTPUTS_DIRPATH,outvarfile2),"wb")
+  chemin_fichier2=open(os.path.join(OUTPUTS_DIRPATH,outvarfile2),"w")
   taille_finale_feuille=csv.writer(chemin_fichier2)
   taille_finale_feuille.writerow(["TPS","Espacement","Densite","id plante","talle","rang","Phase","taille feuille","taille gaine","taille limbe"])
   
@@ -856,7 +854,7 @@ def StartEach(lstring):
   longueur_totale_feuille=0
   Rootbiom=0
   
-  for ID in xrange(nb_plantes):
+  for ID in range(nb_plantes):
     # AJOUT SIMON 24-12-2019
     
     if current_day in cutting_dates and changing_day_cutting == True:
@@ -882,8 +880,8 @@ def StartEach(lstring):
         dt=1
         
     if TPS==ParamP[ID]['DCOUP']+0.75:
-      for i in xrange(len(Seuil)):
-        for j in xrange(len(Seuil[i])):
+      for i in range(len(Seuil)):
+        for j in range(len(Seuil[i])):
           Seuil[i][j]=5.5
           
   
@@ -893,7 +891,7 @@ def StartEach(lstring):
     mortality_zone = pd.DataFrame()
     for i in [i for i in range(len(lstring))]:
      if lstring[i] == '[' and lstring[i+1] == 'phytomere':
-       mortality_zone = mortality_zone.append(pd.DataFrame({'id_plante': [lstring[i+1][0].id_plante], 'id_talle': [lstring[i+1][0].id_talle], 'id_rang': [lstring[i+1][0].id_rang]}))
+       mortality_zone = pd.concat([mortality_zone, pd.DataFrame({'id_plante': [lstring[i+1][0].id_plante], 'id_talle': [lstring[i+1][0].id_talle], 'id_rang': [lstring[i+1][0].id_rang]})])
     
     
     
@@ -948,7 +946,7 @@ def EndEach(lstring, lscene):
        id_plante = lstring[id][0].id_plante
        id_talle = lstring[id][0].id_talle
        area = res['area'][id]
-       radiation_interception = radiation_interception.append(pd.DataFrame({'id_plante': [id_plante], 'id_talle': [id_talle], 'date': [current_day], 'organ': lstring[id].name, 'Ei': [v], 'area': [area]}))
+       radiation_interception = pd.concat([radiation_interception, pd.DataFrame({'id_plante': [id_plante], 'id_talle': [id_talle], 'date': [current_day], 'organ': lstring[id].name, 'Ei': [v], 'area': [area]})])
     
     # ------------------------------------------------------------------------------------------------
     # --------------------------- Conditions for tiller regression  ----------------------------------
@@ -973,14 +971,14 @@ def EndEach(lstring, lscene):
           time_condition = current_day - period_considered_tiller_regression <= radiation_interception.date
           df = radiation_interception[select_plant & select_tiller & time_condition]
           tiller_raditation = (df.Ei * df.area).sum() / df.area.sum()
-          youngest_tillers_radiations = youngest_tillers_radiations.append(pd.DataFrame({'id_talle': [id_talle], 'Ei_tiller': [tiller_raditation]}))
+          youngest_tillers_radiations = pd.concat([youngest_tillers_radiations, pd.DataFrame({'id_talle': [id_talle], 'Ei_tiller': [tiller_raditation]})])
         
         potential_tiller_to_remove = youngest_tillers_radiations[youngest_tillers_radiations.Ei_tiller == min(youngest_tillers_radiations.Ei_tiller)]
         if potential_tiller_to_remove.Ei_tiller.item() <= radiation_threshold:
-          tiller_to_remove = tiller_to_remove.append(pd.DataFrame({'id_plante': [id_plante], 'id_talle': [potential_tiller_to_remove.id_talle.item()]}))
+          tiller_to_remove = pd.concat([tiller_to_remove, pd.DataFrame({'id_plante': [id_plante], 'id_talle': [potential_tiller_to_remove.id_talle.item()]})])
     
     if option_mophogenetic_regulation_by_carbone == True:
-      for ID in xrange(nb_plantes):
+      for ID in range(nb_plantes):
         BiomProd[ID] = Ray[ID] * RUE # Ray: MJ PAR ; RUE : g MJ-1
         print('Plante %s, Ray: %s, BiomProd: %s' % (ID, Ray[ID],BiomProd[ID]))
   
@@ -1091,7 +1089,7 @@ def End(lstring,lscene): #Ecriture et fermeture des fichiers de sortie
   
   
   ### Remplissage du fichier taille_finale_feuille ###
-  for ID in xrange(nb_plantes):
+  for ID in range(nb_plantes):
     les_feuilles_emergees = les_feuilles[(les_feuilles['Plante'] == ID) & (les_feuilles['Phase'] == 'mature')]['ObjetOrgane'].tolist()
     for x in les_feuilles_emergees:
       taille_finale_feuille.writerow([TPS, Espacement, Densite,ID+1, x.id_talle+1, x.id_rang+1, x.Phase, x.Taillefeuille, x.Taillegaine, x.Taillelimbe])
@@ -1237,8 +1235,8 @@ CouvertVegetal(X):
   if groupe=='croissance':
     if X==1:
       nproduce CouvertVegetal(2)
-      for i in xrange(NBlignes):
-        for j in xrange(NBcolonnes):
+      for i in range(NBlignes):
+        for j in range(NBcolonnes):
           #id_plante=i*NBcolonnes+j
           #id_geno=i
           id_plante = Plantes[i][j]
@@ -1475,7 +1473,7 @@ Feuille(X, X_apex, X_phytomere):
         numsteps=ceil((X.Taillegaine)/LSTEP)
       
       # Calcul surfaces limbe et gaine
-      for i in xrange(int(numsteps)):
+      for i in range(int(numsteps)):
         if (i>=numstepsg-1):
           taille=X.Taillelimbe+X.coupe
           L0=X.Taillefinalelimbe-taille
@@ -1537,7 +1535,7 @@ Feuille(X, X_apex, X_phytomere):
           else:
             if(i==numstepsg):
               if X.id_rang>4:
-                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in xrange(X.id_rang-3,X.id_rang-1)])
+                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in range(X.id_rang-3,X.id_rang-1)])
               else:
                 pseudotige=Taille_finale_gaine[X.id_plante][X.id_talle][X.id_rang-1]
               if (X.Taillegaine > pseudotige):
@@ -1564,7 +1562,7 @@ Feuille(X, X_apex, X_phytomere):
             
             else:
               if X.id_rang>4:
-                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in xrange(X.id_rang-3,X.id_rang-1)])
+                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in range(X.id_rang-3,X.id_rang-1)])
               else:
                 pseudotige=Taille_finale_gaine[X.id_plante][X.id_talle][X.id_rang-1]
               
@@ -1624,7 +1622,7 @@ Feuille(X, X_apex, X_phytomere):
 
 
 GetPos(a,b,c):
-  for ID in xrange(nb_plantes):
+  for ID in range(nb_plantes):
     if TPS==ParamP[ID]['DCOUP']+0.5:
       produce
 
@@ -1672,7 +1670,7 @@ apex(X):
     
     for phytomere_rank in X.organ_lengths_dict.keys():
       for organ in X.organ_lengths_dict[phytomere_rank].keys():
-        df_organ_lengths = df_organ_lengths.append({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Id_rang': phytomere_rank, 'Organ': organ, 'Length': X.organ_lengths_dict[phytomere_rank][organ]}, ignore_index = True)
+        df_organ_lengths = pd.concat([df_organ_lengths, pd.Series({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Id_rang': phytomere_rank, 'Organ': organ, 'Length': X.organ_lengths_dict[phytomere_rank][organ]})], ignore_index = True)
     
     if option_floraison == True:
       if X.phenological_state == 'vegetative':
@@ -1690,7 +1688,7 @@ apex(X):
           X.phenological_state = 'reproductive'
           print('reproductive')
           
-    df_induction = df_induction.append({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Daily_mean_temperature': daily_temperature, 'Daily_daylength': daily_daylength, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Leaf_produced': X.total_created_leaves, 'Primordia_on_apex': X.primordia_number, 'Spikelet_number': X.spikelet_created, 'Vernalisation_rate': X.primary_induction_index, 'Secondary_induction_rate': X.secondary_induction_index, 'Heading_date': X.heading_date}, ignore_index = True)
+    df_induction = pd.concat([df_induction, pd.Series({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Daily_mean_temperature': daily_temperature, 'Daily_daylength': daily_daylength, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Leaf_produced': X.total_created_leaves, 'Primordia_on_apex': X.primordia_number, 'Spikelet_number': X.spikelet_created, 'Vernalisation_rate': X.primary_induction_index, 'Secondary_induction_rate': X.secondary_induction_index, 'Heading_date': X.heading_date})], ignore_index = True)
   
   if groupe=='croissance':     
     if (X.phenological_state == 'vegetative' or X.phenological_state == 'vernalized' or (X.phenological_state == 'reproductive' and (X.total_created_leaves < X.final_leaf_number or X.final_leaf_number is None))):
@@ -1709,7 +1707,7 @@ apex(X):
         X.organ_lengths_dict[YP.id_rang] = {'limb': YF.Taillelimbe, 'sheath': YF.Taillegaine, 'internode': YINT.length}
         if X.appearance_date == None and X.total_emerged_leaves > 0:
           X.appearance_date = TPS
-          tiller_appearance = tiller_appearance.append(pd.DataFrame({'id_plante': [X.id_plante], 'id_talle': [X.id_talle], 'appearance_date': [X.appearance_date]}))
+          tiller_appearance = pd.concat([tiller_appearance, pd.DataFrame({'id_plante': [X.id_plante], 'id_talle': [X.id_talle], 'appearance_date': [X.appearance_date]})])
         
         
         
@@ -2206,7 +2204,7 @@ Feuille(X, Y, Z):
     
     if (X.Phase=='cachee'):
       numsteps=(X.Taillefeuille-X.coupe)/LSTEP
-      for i in xrange(int(numsteps)):
+      for i in range(int(numsteps)):
         taille=X.Taillefeuille
         L0=X.Taillefinalelimbe-taille
         
@@ -2238,7 +2236,7 @@ Feuille(X, Y, Z):
         numsteps=ceil((X.Taillegaine)/LSTEP)
       numstepsg=ceil((X.Taillegaine)/LSTEP)
       
-      for i in xrange(int(numsteps)):
+      for i in range(int(numsteps)):
         if (i<numstepsg-1):
           rank=X.id_rang
           large=max((2/pi)*(paramManagement['CoefDirLonLarAjust']*log(max(X.Taillegaine*5,1))-paramManagement['OrdOriLonLarAjust']),0.1)
@@ -2277,7 +2275,7 @@ Feuille(X, Y, Z):
           
           if(i==numstepsg):
             if X.id_rang>4:
-              pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in xrange(X.id_rang-3,X.id_rang-1)])
+              pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in range(X.id_rang-3,X.id_rang-1)])
             else:
               pseudotige=Taille_finale_gaine[X.id_plante][X.id_talle][X.id_rang-1]
             
@@ -2321,7 +2319,7 @@ Feuille(X, Y, Z):
             
             else:
               if X.id_rang>4:
-                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in xrange(X.id_rang-3,X.id_rang-1)])
+                pseudotige=max([Taille_finale_gaine[X.id_plante][X.id_talle][x] for x in range(X.id_rang-3,X.id_rang-1)])
               else:
                 pseudotige=Taille_finale_gaine[X.id_plante][X.id_talle][X.id_rang-1]
               

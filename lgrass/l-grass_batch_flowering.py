@@ -25,8 +25,9 @@ import pandas as pd
 
 #path_ = r'D:\Simon\Python\lgrass\lgrass'
 
-INPUTS_DIRPATH = 'inputs'
-OUTPUTS_DIRPATH = r'outputs'
+CURRENT_FOLDER = os.path.dirname(os.path.realpath(__file__))
+INPUTS_DIRPATH = os.path.join(CURRENT_FOLDER, 'inputs')
+OUTPUTS_DIRPATH = os.path.join(CURRENT_FOLDER, 'outputs')
 # date_string = datetime.datetime.now() .strftime('%Y_%m_%d_%Hh%M')
 # output_batch_path = open(os.path.join(OUTPUTS_DIRPATH, 'output_batch_path', date_string), "wb")
 # output_batch = csv.writer(output_batch_path)
@@ -35,12 +36,12 @@ OUTPUTS_DIRPATH = r'outputs'
 
 # path_param = os.path.join(INPUTS_DIRPATH,'Parametre_plante_Lgrass.xls') # Fichier contenant les parametres
 #path_param = 'D:\Simon\Python\lgrass\lgrass\inputs\Parametre_plante_Lgrass.xls'
-path_param = 'inputs/Parametre_plante_Lgrass.xls'
+path_param = os.path.join(INPUTS_DIRPATH, 'Parametre_plante_Lgrass.xls')
 
 onglet1 = 'FL'
 onglet2 = 'FC'
-TableParamP1 = pd.read_excel(path_param, sheetname=onglet1)
-TableParamP2 = pd.read_excel(path_param, sheetname=onglet2)
+TableParamP1 = pd.read_excel(path_param, sheet_name=onglet1)
+TableParamP2 = pd.read_excel(path_param, sheet_name=onglet2)
 paramP1 = dict(zip(TableParamP1['name'], TableParamP1['value']))
 paramP2 = dict(zip(TableParamP2['name'], TableParamP2['value']))
 
@@ -81,8 +82,8 @@ Premiecroiss = np.array([90, 110, 150, 170])
 # simul_conditions = pd.DataFrame(columns=column_names)
 
 #simul_conditions = pd.read_csv(r"D:\Simon\Python\lgrass\lgrass\inputs\plan_simulation.csv")
-simul_conditions = pd.read_csv(os.path.join("inputs/plan_simulation.csv"))
-value_C = pd.read_csv(os.path.join("inputs/donnees_C.csv"))
+simul_conditions = pd.read_csv(os.path.join(INPUTS_DIRPATH, "plan_simulation.csv"))
+value_C = pd.read_csv(os.path.join(INPUTS_DIRPATH, "donnees_C.csv"))
 
 for x in range(simul_conditions.shape[0]):
     row = simul_conditions.iloc[x]
@@ -103,7 +104,7 @@ for x in range(simul_conditions.shape[0]):
     name = str(row["name"])
     print(name)
     names.append(name)
-    lpy_filename = os.path.join('lgrass.lpy')
+    lpy_filename = os.path.join(CURRENT_FOLDER, 'lgrass.lpy')
     testsim[name] = Lsystem(lpy_filename)
     #testsim[name].axiom = "CouvertVegetal(2)"
     testsim[name].derivationLength = int(row["derivationLength"])
@@ -123,7 +124,8 @@ for x in range(simul_conditions.shape[0]):
     testsim[name].nb_plantes = len(testsim[name].ParamP)
     testsim[name].NBlignes = int(math.ceil(np.sqrt(testsim[name].nb_plantes)))
     testsim[name].NBcolonnes = int(math.floor(np.sqrt(testsim[name].nb_plantes)))
-    testsim[name].posPlante = [[i, j] for i, j in zip(sorted(range(testsim[name].NBlignes) * testsim[name].NBcolonnes), range(testsim[name].NBcolonnes) * testsim[name].NBlignes)]
+    testsim[name].posPlante = [[i, j] for i, j in zip(sorted(list(range(testsim[name].NBlignes)) * testsim[name].NBcolonnes), \
+                                                            list(range(testsim[name].NBcolonnes)) * testsim[name].NBlignes)]
     # Creation des matrices d'identifiant des plantes et de leur genotype
     testsim[name].Plantes = np.arange(testsim[name].nb_plantes).reshape(testsim[name].NBlignes, testsim[name].NBcolonnes)
     testsim[name].Genotypes = np.array([i for i in value_C['geno']]).reshape(testsim[name].NBlignes, testsim[name].NBcolonnes)
