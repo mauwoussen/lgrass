@@ -40,7 +40,7 @@ def runlsystem(plan_sim=None, id_scenario=0, genet_path='modelgenet', id_gener=1
     # Charger le plan de simulation et le lsystem
     row = plan_sim.iloc[id_scenario]
     name = str(row["name"])
-    lpy_filename = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"lgrass", "lgrass.lpy")
+    lpy_filename = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),"lgrass", "lgrass.lpy")
     lsystem = opy.Lsystem(lpy_filename)
     lsystem.name_sim = name
 
@@ -139,7 +139,7 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
         raise NameError('Pas de plan de simulation chargé.')
     row = plan_sim.iloc[id_scenario]
     # Config des fichiers d'entrée
-    INPUTS_DIRPATH = 'example/SIMPRAISE/inputs'
+    INPUTS_DIRPATH = 'inputs'
     src = os.path.join(INPUTS_DIRPATH, 'insim.txt')
     dst = f"modelgenet_{row['name']}"
     if os.name == "posix" :
@@ -148,9 +148,10 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
         exe = 'simpraise.exe'
 
     # TODO : Valable sous windows
-    dst = os.path.join(os.path.dirname(__file__), dst)
-    genetpath = os.path.join(os.path.dirname(__file__), 'modelgenet')
-    os.system(f"mkdir {dst}")
+    current_folder = os.path.dirname(os.path.abspath(__file__))
+    dst = os.path.join(current_folder, dst)
+    genetpath = os.path.join(current_folder, 'modelgenet')
+    os.system(f"mkdir -p {dst}")
     for f in os.listdir(genetpath):
         if os.name == "posix" :
             os.system(f'cp {os.path.join(genetpath, f)} {os.path.join(dst, f)}')
@@ -175,7 +176,7 @@ def simpraise(plan_sim=None, id_scenario=0, display_morpho=False):
 
 if __name__ == '__main__':
     timing = time.time()
-    plan = pd.read_csv("example/SIMPRAISE/inputs/plan_simulation.csv", sep=',')
+    plan = pd.read_csv("inputs/plan_simulation.csv", sep=',')
 
     # runlsystem(plan_sim=plan, id_scenario=4, id_gener=1, display=False)
     for i in range(2, 4):
