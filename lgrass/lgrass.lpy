@@ -16,9 +16,10 @@ from lgrass.lgrass import *
 
 
 ##### Configuration du chemin #####
-INPUTS_DIRPATH = 'inputs'
-OUTPUTS_DIRPATH = 'outputs'
-GRAPHS_DIRPATH = 'graphs'
+temp_folder = "example/SIMPRAISE/"
+INPUTS_DIRPATH = os.path.join(temp_folder, 'inputs')
+OUTPUTS_DIRPATH = os.path.join(temp_folder, 'outputs')
+GRAPHS_DIRPATH = os.path.join(temp_folder, 'graphs')
 
 ##### Parametres plante #####
 path_param=os.path.join(INPUTS_DIRPATH,'Parametre_plante_Lgrass.xls') # Fichier contenant les parametres

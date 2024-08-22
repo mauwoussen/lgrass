@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import math
 import os
+import subprocess
 from lgrass import flowering_functions as flowering_functions
 
 
@@ -218,5 +219,8 @@ def rungenet(src, dst, exe, mat, status):
             destination.close()
             file.close()
     os.chdir(dst)
-    os.startfile(exe)
+    if os.name == "posix":
+        subprocess.call([os.path.join(dst, exe)])  
+    else:  
+        os.startfile(exe)
     os.chdir('..')

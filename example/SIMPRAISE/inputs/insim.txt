@@ -9,9 +9,9 @@ insim.002
 *status_gener 
 0
 *mnum&fnum 
-2,2
+1,1
 *num_cand 
-4
+64
 *n_traits 
 1
 *nloci 

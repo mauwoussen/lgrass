@@ -7,26 +7,27 @@
 import multiprocessing
 import time
 import pandas as pd
-from lgrass import lgrass_batch_simpraise as batch
+import lgrass_batch_simpraise as batch
 
 
 if __name__ == '__main__':
     timing = time.time()
-    plan = pd.read_csv("inputs/plan_simulation.csv", sep=',')
+    plan = pd.read_csv("example/SIMPRAISE/inputs/plan_simulation.csv", sep=',')
+    genet_path = "example/SIMPRAISE/modelgenet"
 
-    # for i in range(9,17):
-    #     batch.runlsystem(plan, i, 1)
+    for i in range(1,4):
+        batch.runlsystem(plan, id_scenario=i, genet_path=genet_path, id_gener=1)
 
     ###    Utilisation de Pool multiprocess    ###
 
-    multiprocessing.freeze_support()
-    CPUnb = int(multiprocessing.cpu_count())  # nombre de processeurs utilises
-    pool = multiprocessing.Pool(processes=CPUnb)
-    for j in range(5, 15):
-        pool.apply_async(batch.runlsystem, args=(plan, j, 1))
-    pool.close()
-    pool.join()
-    print('Global execution time : ', time.time() - timing)
+    # multiprocessing.freeze_support()
+    # CPUnb = 3  # int(multiprocessing.cpu_count())  # nombre de processeurs utilises
+    # pool = multiprocessing.Pool(processes=CPUnb)
+    # for j in range(1, 4):
+    #     pool.apply_async(batch.runlsystem, args=(plan, j, 1))
+    # pool.close()
+    # pool.join()
+    # print('Global execution time : ', time.time() - timing)
 
     ###   Utilisation de Process multiprocess   ###
 
