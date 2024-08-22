@@ -103,7 +103,7 @@ option_graphic_outputs = False
 
 
 #### Load flowering model
-import flowering_functions
+from lgrass import flowering_functions as flowering_functions
 flowering_model = flowering_functions.FloweringFunctions()
 
 
@@ -118,7 +118,7 @@ flowering_model = flowering_functions.FloweringFunctions()
 #   - daylength: float
 # ------------------------------------------------------------------------------------------------
 
-import meteo_ephem
+from lgrass import meteo_ephem as meteo_ephem
 sowing_date = "2018_11_13"
 site = 'LUSIGNAN'
 meteo_path = os.path.join(INPUTS_DIRPATH, 'meteo_file.csv')
@@ -757,7 +757,7 @@ def Start():
   changing_day_cutting = [True] * nb_plantes # Allow that cutting occurs only once in a day (the first GDD)
   # Recuperation des variables issues de la simulation sauvegardee
   if OptionAxiom:
-    import gen_lstring
+    from lgrass import gen_lstring as gen_lstring
     Biomasse_aerienne, Biomasse_racinaire, PourcentageRootGrowthRealized, Reserve, Demande_feuille, PourcentageFeuilGrowthRealized, les_diametres, Seuil, Taille_finale_gaine, nb_talle, surface_foliaire_emergee, Surfoliaireencours, les_feuilles = gen_lstring.load_variables()
 
   else:
@@ -1063,7 +1063,7 @@ def End(lstring,lscene): #Ecriture et fermeture des fichiers de sortie
   # df_organ_lengths.to_csv(os.path.join(OUTPUTS_DIRPATH, output_organ_lengths_file_name + '.csv'), index = False)
 
   if option_graphic_outputs == True:
-    import Lgrass_plot_functions
+    from lgrass import Lgrass_plot_functions as Lgrass_plot_functions
     graphic = Lgrass_plot_functions.GraphicOutputs(GRAPHS_DIRPATH)
     graphic.graph_induction(os.path.join(OUTPUTS_DIRPATH, output_induction_file_name))
     graphic.graph_length(os.path.join(OUTPUTS_DIRPATH, output_organ_lengths_file_name))
@@ -1131,7 +1131,7 @@ def TpourY2(Y, Ym, Te, Tm):  # retrouver le temps T auquel la taille de la feuil
 
 def gener_lstring():  #Ajout Thibault 02/06/2020 Initialiser l'axiom avec une chaine existante ou non
   if OptionAxiom:
-    import gen_lstring
+    from lgrass import gen_lstring as gen_lstring
     modulenamelist, moduleparam = gen_lstring.load_lstring()
     for n,p in zip(modulenamelist, moduleparam):
       if p == None:
@@ -1663,7 +1663,7 @@ apex(X):
         X.organ_lengths_dict[YP.id_rang] = {'limb': YF.Taillelimbe, 'sheath': YF.Taillegaine, 'internode': YINT.length}
         if X.appearance_date == None and X.total_emerged_leaves > 0:
           X.appearance_date = TPS
-          tiller_appearance = tiller_appearance.append(pd.DataFrame({'id_plante': [X.id_plante], 'id_talle': [X.id_talle], 'appearance_date': [X.appearance_date]}))
+          tiller_appearance = pd.concat([tiller_appearance, pd.DataFrame([{'id_plante': [X.id_plante], 'id_talle': [X.id_talle], 'appearance_date': [X.appearance_date]}])], ignore_index=True)
         
         
         

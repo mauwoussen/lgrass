@@ -9,13 +9,14 @@
 import os
 import openalea.lpy as opy
 import openalea.plantgl as opal
-import meteo_ephem
-import param_reproduction_functions as prf
-from output_data import CsvGenerator
-import cuts
-import run_caribu_lgrass
-import gen_lstring
-import lgrass
+
+from lgrass import meteo_ephem as meteo_ephem
+from lgrass import param_reproduction_functions as prf
+from lgrass.output_data import CsvGenerator
+from lgrass import cuts as cuts
+from lgrass import run_caribu_lgrass as run_caribu_lgrass
+from lgrass import gen_lstring as gen_lstring
+
 import pandas as pd
 import numpy as np
 import time

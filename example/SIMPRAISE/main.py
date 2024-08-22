@@ -7,7 +7,7 @@
 import multiprocessing
 import time
 import pandas as pd
-import lgrass_batch_simpraise as batch
+from lgrass import lgrass_batch_simpraise as batch
 
 
 if __name__ == '__main__':

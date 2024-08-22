@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import math
 import os
-import flowering_functions
+from lgrass import flowering_functions as flowering_functions
 
 
 # Créer la matrice de croisement des plantes pour établir une nouvelle génération de nb_plantes

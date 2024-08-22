@@ -8,7 +8,6 @@
 import os
 import pickle
 import pandas as pd
-import lgrass
 
 lstring_dir = "outputs/Sauvegardes_axiom/lstring/"
 var_dir = "outputs/Sauvegardes_axiom/variables/"
