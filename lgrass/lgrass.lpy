@@ -12,6 +12,7 @@ from copy import *
 #import IOxls
 import os
 import pandas as pd
+from lgrass.lgrass import *
 
 
 ##### Configuration du chemin #####
@@ -722,7 +723,7 @@ def LAI_proximite(id_plante):
 
 def Start():
   global timing,growth_realized,dt,TPS,TPS_expe #Parametres de temps
-  # global df_induction, df_organ_lengths
+  global df_induction, df_organ_lengths
   global surface_biomass,chemin_fichier1,chemin_fichier2,chemin_fichier3,long_root,simul_expe,taille_finale_feuille, outvarfile #Fichiers de sortie
   global Biomasse_aerienne,Biomasse_racinaire,BiomProd,PourcentageRootGrowthRealized,PourcentageRootGrowthRealized,Reserve,Demande_feuille,PourcentageFeuilGrowthRealized,les_diametres,Seuil,Taille_finale_gaine,nb_talle #Parametres vides
   global NBlignes,NBcolonnes,posPlante,Espacement #Parametres scene
@@ -791,9 +792,9 @@ def Start():
   t2=[ParamP[i]['t2'] for i in range(nb_plantes)]
   #t3=[ParamP[i]['t3'] for i in range(nb_plantes)]
 
-  # df_induction = pd.DataFrame(columns = ['GDD', 'Date', 'Site', 'Day', 'Daily_mean_temperature', 'Daily_daylength', 'Id_plante', 'Id_talle', 'topology', 'Leaf_produced', 'Primordia_on_apex', 'Spikelet_number', 'Vernalisation_rate', 'Secondary_induction_rate', 'Heading_date'])
+  df_induction = pd.DataFrame(columns = ['GDD', 'Date', 'Site', 'Day', 'Daily_mean_temperature', 'Daily_daylength', 'Id_plante', 'Id_talle', 'topology', 'Leaf_produced', 'Primordia_on_apex', 'Spikelet_number', 'Vernalisation_rate', 'Secondary_induction_rate', 'Heading_date'])
 
-  # df_organ_lengths = pd.DataFrame(columns = ['GDD', 'Date', 'Site', 'Day', 'Id_plante', 'Id_talle', 'Id_rang', 'Organ', 'Length'])
+  df_organ_lengths = pd.DataFrame(columns = ['GDD', 'Date', 'Site', 'Day', 'Id_plante', 'Id_talle', 'Id_rang', 'Organ', 'Length'])
 
   tiller_appearance = pd.DataFrame()
 
@@ -816,7 +817,7 @@ def Start():
 
 def StartEach(lstring):
   global RootPotentialNewBiomass,longueur_totale_feuille,Rootbiom,groupe,dt,reprise_coupe,CoupeTaille
-  # global df_induction, df_organ_lengths
+  global df_induction, df_organ_lengths
   global current_day, meteo, tiller_appearance, tiller_to_remove, mortality_zone, changing_day_cutting
 #  global apex_characteristics, internode_characteristics
 
@@ -894,7 +895,7 @@ def EndEach(lstring, lscene):
   global simul_expe,surface_biomass,taille_finale_feuille
   global TPS,dt,mtg,surface_foliaire_emergee,les_pointes,les_primordiums,RootPotentialNewBiomass,les_feuilles,les_feuilles_emergees, les_segments_feuilles, les_racines, Reserve,Biomasse_aerienne,Surfoliaireencours,Biomasse_racinaire,fichier_test,groupe,PourcentageRootGrowthRealized,PourcentageFeuilGrowthRealized,Demande_feuille,C,reprise_coupe,BiomProd, rapportS9_SSol_dict
   global current_day, meteo
-  # global df_induction, df_organ_lengths
+  global df_induction, df_organ_lengths
   global tiller_appearance, tiller_to_remove
 #  global apex_characteristics, internode_characteristics # AJOUT SIMON
 
@@ -935,7 +936,7 @@ def EndEach(lstring, lscene):
       surface_foliaire_emergee[id_plante] += surface_gaine_emergee
 
       ##### Remplissage du fichier surface_biomass #####
-      # surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
+      surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
 
     # Calcul LAI proximite
     rapportS9_SSol_dict[id_plante] = LAI_proximite(id_plante)
@@ -1003,7 +1004,7 @@ def EndEach(lstring, lscene):
 def End(lstring,lscene): #Ecriture et fermeture des fichiers de sortie
   global taille_finale_feuille,surface_biomass,simul_expe, outvarfile, Espacement
   global TPS,timing,chemin_fichier1,chemin_fichier2,chemin_fichier3,mtg,long_root, les_racines, apex_characteristics, internode_characteristics
-  # global df_induction, df_organ_lengths
+  global df_induction, df_organ_lengths
 
 
   ### Remplissage du fichier taille_finale_feuille ###
@@ -1059,8 +1060,8 @@ def End(lstring,lscene): #Ecriture et fermeture des fichiers de sortie
 
   #print(lstring)
 
-  # df_induction.to_csv(os.path.join(OUTPUTS_DIRPATH, output_induction_file_name + '.csv'), index = False)
-  # df_organ_lengths.to_csv(os.path.join(OUTPUTS_DIRPATH, output_organ_lengths_file_name + '.csv'), index = False)
+  df_induction.to_csv(os.path.join(OUTPUTS_DIRPATH, output_induction_file_name + '.csv'), index = False)
+  df_organ_lengths.to_csv(os.path.join(OUTPUTS_DIRPATH, output_organ_lengths_file_name + '.csv'), index = False)
 
   if option_graphic_outputs == True:
     from lgrass import Lgrass_plot_functions as Lgrass_plot_functions
@@ -1564,7 +1565,7 @@ Entrenoeud(X_EN, X_AP, X_F, X_phytomere):
 
 apex(X):
   global les_feuilles, current_day, meteo, tiller_appearance
-  # global df_induction, df_organ_lengths
+  global df_induction, df_organ_lengths
 
   if X.day < current_day:
     X.day = current_day
@@ -1572,9 +1573,9 @@ apex(X):
     daily_temperature = meteo.mean_temperature[meteo.experimental_day == current_day].iloc[0]
     daily_daylength = meteo.daylength[meteo.experimental_day == current_day].iloc[0]
 
-    # for phytomere_rank in X.organ_lengths_dict.keys():
-    #     for organ in X.organ_lengths_dict[phytomere_rank].keys():
-    #         df_organ_lengths = df_organ_lengths.append({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Id_rang': phytomere_rank, 'Organ': organ, 'Length': X.organ_lengths_dict[phytomere_rank][organ]}, ignore_index = True)
+    for phytomere_rank in X.organ_lengths_dict.keys():
+        for organ in X.organ_lengths_dict[phytomere_rank].keys():
+            df_organ_lengths = pd.concat([df_organ_lengths, pd.DataFrame([{'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'Id_rang': phytomere_rank, 'Organ': organ, 'Length': X.organ_lengths_dict[phytomere_rank][organ]}])], ignore_index = True)
 
     # ------------------------------------------------------------------------------------------------
     # ------------------------- Management of the flowering state of the apex ------------------------
@@ -1620,7 +1621,7 @@ apex(X):
           X.phenological_state = 'reproductive'
           print('reproductive')
 
-    # df_induction = df_induction.append({'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Daily_mean_temperature': daily_temperature, 'Daily_daylength': daily_daylength, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'topology':X.topology, 'Leaf_produced': X.total_created_leaves, 'Primordia_on_apex': X.primordia_number, 'Spikelet_number': X.spikelet_created, 'Vernalisation_rate': X.primary_induction_index, 'Secondary_induction_rate': X.secondary_induction_index, 'Heading_date': X.heading_date}, ignore_index = True)
+    df_induction = pd.concat([df_induction, pd.DataFrame([{'GDD': TPS, 'Date': date, 'Site': site, 'Day': current_day, 'Daily_mean_temperature': daily_temperature, 'Daily_daylength': daily_daylength, 'Id_plante': X.id_plante, 'Id_talle': X.id_talle, 'topology':X.topology, 'Leaf_produced': X.total_created_leaves, 'Primordia_on_apex': X.primordia_number, 'Spikelet_number': X.spikelet_created, 'Vernalisation_rate': X.primary_induction_index, 'Secondary_induction_rate': X.secondary_induction_index, 'Heading_date': X.heading_date}])], ignore_index = True)
     
     # ------------------------------------------------------------------------------------------------
     # --------------- Management of the phenological increase in leaf growth rate --------------------
