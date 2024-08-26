@@ -16,7 +16,8 @@ from lgrass.lgrass import *
 
 
 ##### Configuration du chemin #####
-INPUTS_DIRPATH = 'inputs'
+package_path = os.path.dirname(__file__)
+INPUTS_DIRPATH = os.path.join(package_path, 'inputs')
 OUTPUTS_DIRPATH = 'outputs'
 GRAPHS_DIRPATH = 'graphs'
 

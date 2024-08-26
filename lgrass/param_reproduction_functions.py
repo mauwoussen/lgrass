@@ -218,9 +218,10 @@ def rungenet(src, dst, exe, mat, status):
                     destination.write(str(int(j)) + '\n')
             destination.close()
             file.close()
+    working_directory = os.getcwd()
     os.chdir(dst)
     if os.name == "posix":
         subprocess.call([os.path.join(dst, exe)])  
     else:  
         os.startfile(exe)
-    os.chdir('..')
+    os.chdir(working_directory)
