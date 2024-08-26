@@ -77,9 +77,9 @@ def runcaribu(lstring, lscene, current_day, tiller_appearance, nb_plantes, dico_
         id_plante = lstring[ide][0].id_plante
         id_talle = lstring[ide][0].id_talle
         area = res['area'][ide]
-        dico_caribu['radiation_interception'] = dico_caribu['radiation_interception'].append(pd.DataFrame(
+        dico_caribu['radiation_interception'] = pd.concat([dico_caribu['radiation_interception'], pd.DataFrame([
             {'id_plante': [id_plante], 'id_talle': [id_talle], 'date': [current_day],
-             'organ': lstring[ide].name, 'Ei': [v], 'area': [area]}))
+             'organ': lstring[ide].name, 'Ei': [v], 'area': [area]}])], ignore_index=True)
 
     # ------------------------------------------------------------------------------------------------
     # --------------------------- Conditions for tiller regression  ----------------------------------
@@ -106,14 +106,14 @@ def runcaribu(lstring, lscene, current_day, tiller_appearance, nb_plantes, dico_
                     time_condition = current_day - dico_caribu['period_considered_tiller_regression'] <= dico_caribu['radiation_interception'].date
                     df = dico_caribu['radiation_interception'][select_plant & select_tiller & time_condition]
                     tiller_raditation = (df.Ei * df.area).sum() / df.area.sum()
-                    youngest_tillers_radiations = youngest_tillers_radiations.append(
-                        pd.DataFrame({'id_talle': [id_talle], 'Ei_tiller': [tiller_raditation]}))
+                    youngest_tillers_radiations = pd.concat([youngest_tillers_radiations,
+                        pd.DataFrame([{'id_talle': [id_talle], 'Ei_tiller': [tiller_raditation]}])], ignore_index=True)
 
                 potential_tiller_to_remove = youngest_tillers_radiations[
                     youngest_tillers_radiations.Ei_tiller == min(youngest_tillers_radiations.Ei_tiller)]
                 if potential_tiller_to_remove.Ei_tiller.item() <= dico_caribu['radiation_threshold']:
-                    tiller_to_remove = tiller_to_remove.append(pd.DataFrame(
-                        {'id_plante': [id_plante], 'id_talle': [potential_tiller_to_remove.id_talle.item()]}))
+                    tiller_to_remove = pd.concat([tiller_to_remove, pd.DataFrame([
+                        {'id_plante': [id_plante], 'id_talle': [potential_tiller_to_remove.id_talle.item()]}])], ignore_index=True)
     for ID in range(nb_plantes):
         BiomProd[ID] = dico_caribu['Ray'][ID] * dico_caribu['RUE']  # Ray: MJ PAR ; RUE : g MJ-1
     return BiomProd, dico_caribu['radiation_interception'], dico_caribu['Ray']
