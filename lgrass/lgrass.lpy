@@ -49,6 +49,10 @@ num_primordium=0
 LSTEP=1
 DureeExp = 500
 
+
+# set visualising only leaves
+display_only_leaves = False
+
 ##### Parametre scene #####
 OptionRacine='SansRacines' 
 #OptionRacine='AvecRacines'
@@ -2157,7 +2161,8 @@ phytomere(X, Y):
 
 
 Entrenoeud(X, Y, Z, U):
-  produce SetWidth(1)SetColor(3)F(X.length)
+  if not display_only_leaves :
+    produce SetWidth(1)SetColor(3)F(X.length)
 
 
 Feuille(X, Y, Z):
@@ -2334,25 +2339,30 @@ apex(X):
 
 
 ApexTal(X):
-  nproduce StartGC() SetColor(5) F(0.2) EndGC()
+  if not display_only_leaves :
+    nproduce StartGC() SetColor(5) F(0.2) EndGC()
 
 
 EntrenoeudEpi(X, Y):
-  produce ;(5) F(X.long_entrenoeud)
+  if not display_only_leaves :
+    produce ;(5) F(X.long_entrenoeud)
 
 
 Epillet(X, Y):
-  produce ;(6) F(X.long_epillet)
+  if not display_only_leaves :
+    produce ;(6) F(X.long_epillet)
 
 
 tip(X):
-  if X.longueur<=0:
-    nproduce StartGC()   SetColor(1)PglShape(Cone(X.diametre/2+0.2,0.1,True,16)) EndGC()
-  else:
-    nproduce StartGC()   SetColor(1)PglShape(Cone(X.diametre/2+0.2,X.longueur,True,16)) EndGC()
+  if not display_only_leaves :
+    if X.longueur<=0:
+      nproduce StartGC()   SetColor(1)PglShape(Cone(X.diametre/2+0.2,0.1,True,16)) EndGC()
+    else:
+      nproduce StartGC()   SetColor(1)PglShape(Cone(X.diametre/2+0.2,X.longueur,True,16)) EndGC()
 
 segment(X):
-  nproduce StartGC() SetWidth(X.diametre/2+0.2)SetColor(1)F(X.longueur)EndGC()
+  if not display_only_leaves :
+    nproduce StartGC() SetWidth(X.diametre/2+0.2)SetColor(1)F(X.longueur)EndGC()
 
 endlsystem
 ###### INITIALISATION ######
