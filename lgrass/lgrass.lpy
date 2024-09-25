@@ -53,6 +53,9 @@ DureeExp = 500
 # set visualising only leaves
 display_only_leaves = False
 
+# bypass local LAI with external module
+option_external_coupling = False
+
 ##### Parametre scene #####
 OptionRacine='SansRacines' 
 #OptionRacine='AvecRacines'
@@ -910,81 +913,82 @@ def EndEach(lstring, lscene):
   if reprise_coupe==True:
     reprise_coupe=False
 
-  liste_organes = []
-  for mod in lstring:
-    if mod.name in ('Feuille', ):
-      liste_organes.append({'Plante': mod[0].id_plante, 'id_talle': mod[0].id_talle, 'id_rang': mod[0].id_rang, 'Topology': mod[0].topology, 'Organe': mod.name, 'ObjetOrgane': mod[0], 'Phase': mod[0].Phase})
-  df_organes = pd.DataFrame(liste_organes, columns=['Plante', 'id_talle', 'id_rang', 'Topology', 'Organe', 'ObjetOrgane', 'Phase'])
+  if not option_external_coupling :
+    liste_organes = []
+    for mod in lstring:
+      if mod.name in ('Feuille', ):
+        liste_organes.append({'Plante': mod[0].id_plante, 'id_talle': mod[0].id_talle, 'id_rang': mod[0].id_rang, 'Topology': mod[0].topology, 'Organe': mod.name, 'ObjetOrgane': mod[0], 'Phase': mod[0].Phase})
+    df_organes = pd.DataFrame(liste_organes, columns=['Plante', 'id_talle', 'id_rang', 'Topology', 'Organe', 'ObjetOrgane', 'Phase'])
 
-  les_feuilles = df_organes[(df_organes['Organe'] == 'Feuille')] # Toutes les feuilles de toutes les plantes
+    les_feuilles = df_organes[(df_organes['Organe'] == 'Feuille')] # Toutes les feuilles de toutes les plantes
 
-  rapportS9_SSol_dict = {}
-  for id_plante in les_feuilles['Plante'].unique():
-    les_feuilles_plante = les_feuilles[les_feuilles['Plante'] == id_plante]
-    Biomasse_aerienne[id_plante] = 0
-    surface_foliaire_emergee[id_plante] = 0
-    Demande_feuille[id_plante] = 0
-    for id_talle in les_feuilles_plante['id_talle'].unique():
-      # Toutes les feuilles de la talle
-      les_feuilles_talle = les_feuilles_plante[les_feuilles_plante['id_talle'] == id_talle]['ObjetOrgane'].tolist()
+    rapportS9_SSol_dict = {}
+    for id_plante in les_feuilles['Plante'].unique():
+      les_feuilles_plante = les_feuilles[les_feuilles['Plante'] == id_plante]
+      Biomasse_aerienne[id_plante] = 0
+      surface_foliaire_emergee[id_plante] = 0
+      Demande_feuille[id_plante] = 0
+      for id_talle in les_feuilles_plante['id_talle'].unique():
+        # Toutes les feuilles de la talle
+        les_feuilles_talle = les_feuilles_plante[les_feuilles_plante['id_talle'] == id_talle]['ObjetOrgane'].tolist()
 
-      # Demande croissance de toutes les feuilles de la talle
-      Demande_feuille[id_plante] += sum([x.Besoinencroiss for x in les_feuilles_talle])
+        # Demande croissance de toutes les feuilles de la talle
+        Demande_feuille[id_plante] += sum([x.Besoinencroiss for x in les_feuilles_talle])
 
-      # Biomasse et surface des feuilles emergees uniquement
-      Biomasse_aerienne[id_plante] += sum([x.biomass for x in les_feuilles_talle])
-      surface_foliaire_emergee[id_plante] += sum([x.surface_limbe for x in les_feuilles_talle])  #: N'ajoute que les surfaces de limbes emerges
-      # ajoute les surfaces des gaines emergees ? partir de Seuil
-      seuil_talle = Seuil[id_plante][id_talle]
-      diametre_seuil_talle = max((2 / pi) * (paramManagement['CoefDirLonLarAjust'] * log(max(seuil_talle * 5,1)) - paramManagement['OrdOriLonLarAjust']), 0.1)
-      surface_gaine_emergee = (seuil_talle * pi * diametre_seuil_talle) / 2  # Surface projetee
-      surface_foliaire_emergee[id_plante] += surface_gaine_emergee
+        # Biomasse et surface des feuilles emergees uniquement
+        Biomasse_aerienne[id_plante] += sum([x.biomass for x in les_feuilles_talle])
+        surface_foliaire_emergee[id_plante] += sum([x.surface_limbe for x in les_feuilles_talle])  #: N'ajoute que les surfaces de limbes emerges
+        # ajoute les surfaces des gaines emergees ? partir de Seuil
+        seuil_talle = Seuil[id_plante][id_talle]
+        diametre_seuil_talle = max((2 / pi) * (paramManagement['CoefDirLonLarAjust'] * log(max(seuil_talle * 5,1)) - paramManagement['OrdOriLonLarAjust']), 0.1)
+        surface_gaine_emergee = (seuil_talle * pi * diametre_seuil_talle) / 2  # Surface projetee
+        surface_foliaire_emergee[id_plante] += surface_gaine_emergee
 
-      ##### Remplissage du fichier surface_biomass #####
-      surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
+        ##### Remplissage du fichier surface_biomass #####
+        surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
 
-    # Calcul LAI proximite
-    rapportS9_SSol_dict[id_plante] = LAI_proximite(id_plante)
+      # Calcul LAI proximite
+      rapportS9_SSol_dict[id_plante] = LAI_proximite(id_plante)
 
-    # Mise a jour biomasse et pourcentage echelle plante
-    if Biomasse_aerienne[id_plante]>0 and t1[id_plante]*exp(TPS*t2[id_plante])-t1[id_plante]>0 and surface_foliaire_emergee[id_plante] > 0 and Demande_feuille[id_plante] != 0: #Verifie qu'il y a une partie aerienne et que TPS, t1 et t2 sont positifs          # surface_foliaire_emergee[ID] > 0 and Demande_feuille[ID] > 0 : ajout SIMON
-      # Calcul biomasse creee
-      if option_morphogenetic_regulation_by_carbone == True:
-        # Approche RUE
-        BiomassCree = BiomProd[id_plante]
-      else:
-        # Approche croissance biomasse exponentielle (cf th?se Vincent Migault)
-        BiomassCree=t2[id_plante]*(Biomasse_aerienne[id_plante]+t1[id_plante])*(1+Beta[id_plante]*Alpha[id_plante]*(Biomasse_aerienne[id_plante])**(Alpha[id_plante]-1))
-
-      # Allocation aerien/racinaire + ratio offre/demande
-      if BiomassCree>0 and 0.99*BiomassCree > Demande_feuille[id_plante]:  # demande satisfaite
-        RootBiomassCree = BiomassCree - Demande_feuille[id_plante]  # Allocation surplus non utilise par parties aeriennes aux racines
-        Biomasse_racinaire[id_plante] += RootBiomassCree
-        PourcentageFeuilGrowthRealized[id_plante] = 1  # Pas de limitation croissance foliaire pour prochain pas de temps
-      else:  # Demande non satisafite
-        RootBiomassCree = 0.01*BiomassCree  # Racines ne prennent qu'1% de l'offre
-        Biomasse_racinaire[id_plante] += RootBiomassCree
-        BiomassFeuilCree = 0.99*BiomassCree
-        PourcentageFeuilGrowthRealized[id_plante] = max(0, BiomassFeuilCree / Demande_feuille[id_plante]) # Reduction croissance foliaire potentielle au prorata offre/demande pour prochain pas de temps
-    else:
-      RootBiomassCree=0
-      BiomassCree=0
-
-    if RootPotentialNewBiomass[id_plante]==0:
-      PourcentageRootGrowthRealized[id_plante]=0
-      #Reserve[ID]=Reserve[ID]+RootBiomassCree
-    else:
-      PourcentageRootGrowthRealized[id_plante]=RootBiomassCree/RootPotentialNewBiomass[id_plante]
-      if PourcentageRootGrowthRealized[id_plante]>1:
-        PourcentageRootGrowthRealized[id_plante]=1
-        #Reserve[ID]=Reserve[ID]+(RootBiomassCree-RootPotentialNewBiomass[ID])
-      else:
-        if RootPotentialNewBiomass[id_plante]-RootBiomassCree < Reserve[id_plante]:
-          PourcentageRootGrowthRealized[id_plante]=1
-          #Reserve[ID]=Reserve[ID]-(RootPotentialNewBiomass[ID]-RootBiomassCree)
+      # Mise a jour biomasse et pourcentage echelle plante
+      if Biomasse_aerienne[id_plante]>0 and t1[id_plante]*exp(TPS*t2[id_plante])-t1[id_plante]>0 and surface_foliaire_emergee[id_plante] > 0 and Demande_feuille[id_plante] != 0: #Verifie qu'il y a une partie aerienne et que TPS, t1 et t2 sont positifs          # surface_foliaire_emergee[ID] > 0 and Demande_feuille[ID] > 0 : ajout SIMON
+        # Calcul biomasse creee
+        if option_morphogenetic_regulation_by_carbone == True:
+          # Approche RUE
+          BiomassCree = BiomProd[id_plante]
         else:
-          PourcentageRootGrowthRealized[id_plante]=(RootBiomassCree+Reserve[id_plante])/RootPotentialNewBiomass[id_plante]
-          #Reserve[ID]=0
+          # Approche croissance biomasse exponentielle (cf th?se Vincent Migault)
+          BiomassCree=t2[id_plante]*(Biomasse_aerienne[id_plante]+t1[id_plante])*(1+Beta[id_plante]*Alpha[id_plante]*(Biomasse_aerienne[id_plante])**(Alpha[id_plante]-1))
+
+        # Allocation aerien/racinaire + ratio offre/demande
+        if BiomassCree>0 and 0.99*BiomassCree > Demande_feuille[id_plante]:  # demande satisfaite
+          RootBiomassCree = BiomassCree - Demande_feuille[id_plante]  # Allocation surplus non utilise par parties aeriennes aux racines
+          Biomasse_racinaire[id_plante] += RootBiomassCree
+          PourcentageFeuilGrowthRealized[id_plante] = 1  # Pas de limitation croissance foliaire pour prochain pas de temps
+        else:  # Demande non satisafite
+          RootBiomassCree = 0.01*BiomassCree  # Racines ne prennent qu'1% de l'offre
+          Biomasse_racinaire[id_plante] += RootBiomassCree
+          BiomassFeuilCree = 0.99*BiomassCree
+          PourcentageFeuilGrowthRealized[id_plante] = max(0, BiomassFeuilCree / Demande_feuille[id_plante]) # Reduction croissance foliaire potentielle au prorata offre/demande pour prochain pas de temps
+      else:
+        RootBiomassCree=0
+        BiomassCree=0
+
+      if RootPotentialNewBiomass[id_plante]==0:
+        PourcentageRootGrowthRealized[id_plante]=0
+        #Reserve[ID]=Reserve[ID]+RootBiomassCree
+      else:
+        PourcentageRootGrowthRealized[id_plante]=RootBiomassCree/RootPotentialNewBiomass[id_plante]
+        if PourcentageRootGrowthRealized[id_plante]>1:
+          PourcentageRootGrowthRealized[id_plante]=1
+          #Reserve[ID]=Reserve[ID]+(RootBiomassCree-RootPotentialNewBiomass[ID])
+        else:
+          if RootPotentialNewBiomass[id_plante]-RootBiomassCree < Reserve[id_plante]:
+            PourcentageRootGrowthRealized[id_plante]=1
+            #Reserve[ID]=Reserve[ID]-(RootPotentialNewBiomass[ID]-RootBiomassCree)
+          else:
+            PourcentageRootGrowthRealized[id_plante]=(RootBiomassCree+Reserve[id_plante])/RootPotentialNewBiomass[id_plante]
+            #Reserve[ID]=0
 
   if groupe == 'defoliation':
     les_segments_feuilles = [x for x in lstring if x.name=='SegFeuille']
@@ -2157,7 +2161,8 @@ interpretation:
 
 
 phytomere(X, Y):
-  produce Right(X.angletal)
+  if not display_only_leaves :
+    produce Right(X.angletal)
 
 
 Entrenoeud(X, Y, Z, U):
@@ -2331,11 +2336,13 @@ Feuille(X, Y, Z):
 
 
 SegFeuille(X):
-  produce SetColor(10)F(1)
+  if not display_only_leaves :
+    produce SetColor(10)F(1)
 
 
 apex(X):
-  nproduce StartGC() SetColor(3) F(0.2) EndGC()
+  if not display_only_leaves :
+    nproduce StartGC() SetColor(3) F(0.2) EndGC()
 
 
 ApexTal(X):
