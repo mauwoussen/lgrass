@@ -913,40 +913,41 @@ def EndEach(lstring, lscene):
   if reprise_coupe==True:
     reprise_coupe=False
 
-  if not option_external_coupling :
-    liste_organes = []
-    for mod in lstring:
-      if mod.name in ('Feuille', ):
-        liste_organes.append({'Plante': mod[0].id_plante, 'id_talle': mod[0].id_talle, 'id_rang': mod[0].id_rang, 'Topology': mod[0].topology, 'Organe': mod.name, 'ObjetOrgane': mod[0], 'Phase': mod[0].Phase})
-    df_organes = pd.DataFrame(liste_organes, columns=['Plante', 'id_talle', 'id_rang', 'Topology', 'Organe', 'ObjetOrgane', 'Phase'])
 
-    les_feuilles = df_organes[(df_organes['Organe'] == 'Feuille')] # Toutes les feuilles de toutes les plantes
+  liste_organes = []
+  for mod in lstring:
+    if mod.name in ('Feuille', ):
+      liste_organes.append({'Plante': mod[0].id_plante, 'id_talle': mod[0].id_talle, 'id_rang': mod[0].id_rang, 'Topology': mod[0].topology, 'Organe': mod.name, 'ObjetOrgane': mod[0], 'Phase': mod[0].Phase})
+  df_organes = pd.DataFrame(liste_organes, columns=['Plante', 'id_talle', 'id_rang', 'Topology', 'Organe', 'ObjetOrgane', 'Phase'])
 
-    rapportS9_SSol_dict = {}
-    for id_plante in les_feuilles['Plante'].unique():
-      les_feuilles_plante = les_feuilles[les_feuilles['Plante'] == id_plante]
-      Biomasse_aerienne[id_plante] = 0
-      surface_foliaire_emergee[id_plante] = 0
-      Demande_feuille[id_plante] = 0
-      for id_talle in les_feuilles_plante['id_talle'].unique():
-        # Toutes les feuilles de la talle
-        les_feuilles_talle = les_feuilles_plante[les_feuilles_plante['id_talle'] == id_talle]['ObjetOrgane'].tolist()
+  les_feuilles = df_organes[(df_organes['Organe'] == 'Feuille')] # Toutes les feuilles de toutes les plantes
 
-        # Demande croissance de toutes les feuilles de la talle
-        Demande_feuille[id_plante] += sum([x.Besoinencroiss for x in les_feuilles_talle])
+  rapportS9_SSol_dict = {}
+  for id_plante in les_feuilles['Plante'].unique():
+    les_feuilles_plante = les_feuilles[les_feuilles['Plante'] == id_plante]
+    Biomasse_aerienne[id_plante] = 0
+    surface_foliaire_emergee[id_plante] = 0
+    Demande_feuille[id_plante] = 0
+    for id_talle in les_feuilles_plante['id_talle'].unique():
+      # Toutes les feuilles de la talle
+      les_feuilles_talle = les_feuilles_plante[les_feuilles_plante['id_talle'] == id_talle]['ObjetOrgane'].tolist()
 
-        # Biomasse et surface des feuilles emergees uniquement
-        Biomasse_aerienne[id_plante] += sum([x.biomass for x in les_feuilles_talle])
-        surface_foliaire_emergee[id_plante] += sum([x.surface_limbe for x in les_feuilles_talle])  #: N'ajoute que les surfaces de limbes emerges
-        # ajoute les surfaces des gaines emergees ? partir de Seuil
-        seuil_talle = Seuil[id_plante][id_talle]
-        diametre_seuil_talle = max((2 / pi) * (paramManagement['CoefDirLonLarAjust'] * log(max(seuil_talle * 5,1)) - paramManagement['OrdOriLonLarAjust']), 0.1)
-        surface_gaine_emergee = (seuil_talle * pi * diametre_seuil_talle) / 2  # Surface projetee
-        surface_foliaire_emergee[id_plante] += surface_gaine_emergee
+      # Demande croissance de toutes les feuilles de la talle
+      Demande_feuille[id_plante] += sum([x.Besoinencroiss for x in les_feuilles_talle])
 
-        ##### Remplissage du fichier surface_biomass #####
-        surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
+      # Biomasse et surface des feuilles emergees uniquement
+      Biomasse_aerienne[id_plante] += sum([x.biomass for x in les_feuilles_talle])
+      surface_foliaire_emergee[id_plante] += sum([x.surface_limbe for x in les_feuilles_talle])  #: N'ajoute que les surfaces de limbes emerges
+      # ajoute les surfaces des gaines emergees ? partir de Seuil
+      seuil_talle = Seuil[id_plante][id_talle]
+      diametre_seuil_talle = max((2 / pi) * (paramManagement['CoefDirLonLarAjust'] * log(max(seuil_talle * 5,1)) - paramManagement['OrdOriLonLarAjust']), 0.1)
+      surface_gaine_emergee = (seuil_talle * pi * diametre_seuil_talle) / 2  # Surface projetee
+      surface_foliaire_emergee[id_plante] += surface_gaine_emergee
 
+      ##### Remplissage du fichier surface_biomass #####
+      surface_biomass.writerow([TPS,Espacement,Densite,id_plante+1, id_talle+1, les_feuilles_talle[0].topology, len(les_feuilles_talle),sum(x.biomass for x in les_feuilles_talle),sum(x.surface_limbe for x in les_feuilles_talle) + surface_gaine_emergee])
+
+    if not option_external_coupling :
       # Calcul LAI proximite
       rapportS9_SSol_dict[id_plante] = LAI_proximite(id_plante)
 
