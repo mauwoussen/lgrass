@@ -1180,24 +1180,23 @@ GetPos(a,b,c)<tip(X):
 
 
 CouvertVegetal(X):
-  global groupe,NBlignes,NBcolonnes,genotype
+  global groupe,posPlante,genotype
   if groupe=='croissance':
     if X==1:
       nproduce CouvertVegetal(2)
-      for i in range(NBlignes):
-        for j in range(NBcolonnes):
-          if isinstance(Plantes, int):
-            id_plante=i*NBcolonnes+j
-            id_geno=i
-          else:
-            id_plante = Plantes[i][j]
-            id_geno = Genotypes[i][j]
-          genotype.append(id_geno)
-          param=ParamPlante(id_plante,id_geno)
-          nb_talle.append(0)
-          Seuil.append([5.5])
-          Taille_finale_gaine.append([[5.5,5.5]])
-          nproduce IN SB() RollR(45) MoveTo(j*Espacement,Espacement*i,0) Plante(param) IN EB()
+      for i,p in enumerate(posPlante):
+        if isinstance(Plantes, int):
+          id_plante=i
+          id_geno=i
+        else:
+          id_plante = Plantes[i]
+          id_geno = Genotypes[i]
+        genotype.append(id_geno)
+        param=ParamPlante(id_plante,id_geno)
+        nb_talle.append(0)
+        Seuil.append([5.5])
+        Taille_finale_gaine.append([[5.5,5.5]])
+        nproduce IN SB() RollR(45) MoveTo(p[0], p[1], 0) Plante(param) IN EB()
     else:
       produce CouvertVegetal(X+1)
   if groupe=='defoliation':

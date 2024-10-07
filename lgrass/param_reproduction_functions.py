@@ -120,10 +120,12 @@ def calculate_premierCroiss(x):
 
 # Création du fichier de paramètres d'entrée pour chaque plante et configuration du planteur lgrass
 def define_param(in_param_file='inputs/liste_plantes.csv', in_genet_file=None,
-                 out_param_file='outputs/Simulation1.csv', id_gener=1, opt_repro=None):
+                 out_param_file='outputs/Simulation1.csv', id_gener=1, opt_repro=None, number_of_plants=None):
     if opt_repro is not None and opt_repro != "False":
         infile = get_genet_file(in_genet_file=in_genet_file)
         genet_data = infile.loc[infile['D'] == str(id_gener), :]
+        if number_of_plants is not None and number_of_plants <= len(genet_data):
+            genet_data = genet_data.iloc[:number_of_plants, :]
     data = pd.read_csv(in_param_file)
     # Création du fichier de paramètres d'entrée de chaque plante
     param_init = open(out_param_file, 'w')
@@ -157,9 +159,11 @@ def define_param(in_param_file='inputs/liste_plantes.csv', in_genet_file=None,
     nb_plantes = len(ParamP)
     NBlignes = int(math.ceil(np.sqrt(nb_plantes)))
     NBcolonnes = int(math.floor(np.sqrt(nb_plantes)))
-    posPlante = [[i, j] for i, j in zip(sorted(list(range(NBlignes)) * NBcolonnes), list(range(NBcolonnes)) * NBlignes)]
-    Plantes = np.arange(nb_plantes).reshape(NBlignes, NBcolonnes)
-    Genotypes = np.array([i for i in param_plante.loc['geno']]).reshape(NBlignes, NBcolonnes)
+    posPlante = [[i, j] for i, j in zip(sorted(list(range(NBlignes)) * NBcolonnes), list(range(NBcolonnes)) * NBlignes)] 
+    # Plantes = np.arange(nb_plantes).reshape(NBlignes, NBcolonnes)
+    # Genotypes = np.array([i for i in param_plante.loc['geno']]).reshape(NBlignes, NBcolonnes)
+    Plantes = np.arange(nb_plantes)
+    Genotypes = np.array([i for i in param_plante.loc['geno']])
     return ParamP, nb_plantes, NBlignes, NBcolonnes, posPlante, Plantes, Genotypes, flowering_param
 
 
